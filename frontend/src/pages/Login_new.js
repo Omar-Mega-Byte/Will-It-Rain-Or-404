@@ -27,7 +27,7 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!formData.username || !formData.password) {
       setError('Please fill in all fields');
       return;
@@ -100,7 +100,7 @@ const Login = () => {
               <p className="welcome-subtitle">
                 Access your personalized weather dashboard, saved locations, and premium forecasting tools.
               </p>
-              
+
               <div className="feature-highlights">
                 <div className="highlight-item">
                   <span className="highlight-icon">🎯</span>

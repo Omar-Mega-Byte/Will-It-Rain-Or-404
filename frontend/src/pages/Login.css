@@ -78,7 +78,8 @@
 /* Base Styles */
 .login-page {
   min-height: 100vh;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+    sans-serif;
   background: #ffffff !important;
   position: relative;
   overflow-x: hidden;
@@ -104,7 +105,11 @@
 .orb-1 {
   width: 300px;
   height: 300px;
-  background: radial-gradient(circle, rgba(124, 58, 237, 0.3) 0%, rgba(124, 58, 237, 0.1) 70%);
+  background: radial-gradient(
+    circle,
+    rgba(124, 58, 237, 0.3) 0%,
+    rgba(124, 58, 237, 0.1) 70%
+  );
   top: -150px;
   left: -150px;
   animation-delay: 0s;
@@ -113,7 +118,11 @@
 .orb-2 {
   width: 200px;
   height: 200px;
-  background: radial-gradient(circle, rgba(225, 29, 72, 0.3) 0%, rgba(225, 29, 72, 0.1) 70%);
+  background: radial-gradient(
+    circle,
+    rgba(225, 29, 72, 0.3) 0%,
+    rgba(225, 29, 72, 0.1) 70%
+  );
   top: 50%;
   right: -100px;
   animation-delay: 2s;
@@ -122,16 +131,27 @@
 .orb-3 {
   width: 250px;
   height: 250px;
-  background: radial-gradient(circle, rgba(8, 145, 178, 0.3) 0%, rgba(8, 145, 178, 0.1) 70%);
+  background: radial-gradient(
+    circle,
+    rgba(8, 145, 178, 0.3) 0%,
+    rgba(8, 145, 178, 0.1) 70%
+  );
   bottom: -125px;
   left: 30%;
   animation-delay: 4s;
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  33% { transform: translateY(-20px) rotate(5deg); }
-  66% { transform: translateY(10px) rotate(-3deg); }
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  33% {
+    transform: translateY(-20px) rotate(5deg);
+  }
+  66% {
+    transform: translateY(10px) rotate(-3deg);
+  }
 }
 
 .floating-shapes {
@@ -183,10 +203,19 @@
 }
 
 @keyframes floatShapes {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  25% { transform: translateY(-15px) rotate(90deg); }
-  50% { transform: translateY(10px) rotate(180deg); }
-  75% { transform: translateY(-10px) rotate(270deg); }
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-15px) rotate(90deg);
+  }
+  50% {
+    transform: translateY(10px) rotate(180deg);
+  }
+  75% {
+    transform: translateY(-10px) rotate(270deg);
+  }
 }
 
 /* Navigation */
@@ -304,7 +333,12 @@
 }
 
 .title-highlight {
-  background: linear-gradient(135deg, var(--accent-purple) 0%, var(--accent-pink) 50%, var(--accent-blue) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--accent-purple) 0%,
+    var(--accent-pink) 50%,
+    var(--accent-blue) 100%
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -373,13 +407,18 @@
 }
 
 .form-container::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(135deg, var(--accent-purple) 0%, var(--accent-pink) 50%, var(--accent-blue) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--accent-purple) 0%,
+    var(--accent-pink) 50%,
+    var(--accent-blue) 100%
+  );
   border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
 }
 
@@ -522,7 +561,11 @@
 
 .submit-button {
   width: 100%;
-  background: linear-gradient(135deg, var(--accent-purple) 0%, var(--accent-pink) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--accent-purple) 0%,
+    var(--accent-pink) 100%
+  );
   color: var(--white);
   border: none;
   padding: var(--space-5) var(--space-6);
@@ -559,7 +602,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .divider {
@@ -570,7 +615,7 @@
 
 .divider::before,
 .divider::after {
-  content: '';
+  content: "";
   flex: 1;
   height: 1px;
   background: var(--gray-200);
