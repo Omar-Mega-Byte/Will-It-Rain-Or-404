@@ -70,13 +70,13 @@ const Register = () => {
   };
 
   const isStep2Valid = () => {
-    return formData.username && 
-           passwordValidation.length && 
-           passwordValidation.uppercase && 
-           passwordValidation.lowercase && 
-           passwordValidation.number && 
-           passwordValidation.special && 
-           passwordValidation.match;
+    return formData.username &&
+      passwordValidation.length &&
+      passwordValidation.uppercase &&
+      passwordValidation.lowercase &&
+      passwordValidation.number &&
+      passwordValidation.special &&
+      passwordValidation.match;
   };
 
   const handleNext = () => {
@@ -93,7 +93,7 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!isStep2Valid()) {
       setError('Please complete all required fields with valid information');
       return;
@@ -128,7 +128,7 @@ const Register = () => {
   const getPasswordStrength = () => {
     const validations = Object.values(passwordValidation);
     const validCount = validations.filter(v => v).length;
-    
+
     if (validCount <= 2) return { level: 'weak', color: 'var(--red-500)' };
     if (validCount <= 4) return { level: 'medium', color: 'var(--yellow-500)' };
     return { level: 'strong', color: 'var(--green-500)' };
@@ -180,7 +180,7 @@ const Register = () => {
               <p className="welcome-subtitle">
                 Create your account and unlock advanced weather intelligence tools trusted by meteorologists worldwide.
               </p>
-              
+
               <div className="stats-grid">
                 <div className="stat-card">
                   <div className="stat-number">150K+</div>
@@ -223,8 +223,8 @@ const Register = () => {
               {/* Progress Indicator */}
               <div className="progress-indicator">
                 <div className="progress-bar">
-                  <div 
-                    className="progress-fill" 
+                  <div
+                    className="progress-fill"
                     style={{ width: `${(formStep / 2) * 100}%` }}
                   ></div>
                 </div>
@@ -243,8 +243,8 @@ const Register = () => {
                   {formStep === 1 ? 'Personal Information' : 'Account Setup'}
                 </h2>
                 <p className="form-subtitle">
-                  {formStep === 1 
-                    ? 'Tell us a bit about yourself' 
+                  {formStep === 1
+                    ? 'Tell us a bit about yourself'
                     : 'Create your secure account credentials'
                   }
                 </p>
@@ -364,13 +364,13 @@ const Register = () => {
                           {showPassword ? "👁️" : "👁️‍🗨️"}
                         </button>
                       </div>
-                      
+
                       {formData.password && (
                         <div className="password-strength">
                           <div className="strength-bar">
-                            <div 
-                              className="strength-fill" 
-                              style={{ 
+                            <div
+                              className="strength-fill"
+                              style={{
                                 width: `${(Object.values(passwordValidation).filter(v => v).length / 6) * 100}%`,
                                 background: getPasswordStrength().color
                               }}
@@ -390,8 +390,8 @@ const Register = () => {
                           { key: 'number', text: 'Number' },
                           { key: 'special', text: 'Special character' }
                         ].map(req => (
-                          <div 
-                            key={req.key} 
+                          <div
+                            key={req.key}
                             className={`requirement ${passwordValidation[req.key] ? 'met' : ''}`}
                           >
                             <span className="requirement-icon">
@@ -475,7 +475,7 @@ const Register = () => {
                     {' '}and{' '}
                     <Link to="/privacy" className="terms-link">Privacy Policy</Link>
                   </p>
-                  
+
                   <p className="login-prompt">
                     Already have an account?{' '}
                     <Link to="/login" className="login-link">
