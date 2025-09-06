@@ -37,9 +37,9 @@ public class UserUpdateDto {
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
-        
+
         UserUpdateDto that = (UserUpdateDto) obj;
-        
+
         if (email != null ? !email.equals(that.email) : that.email != null) return false;
         if (firstName != null ? !firstName.equals(that.firstName) : that.firstName != null) return false;
         return lastName != null ? lastName.equals(that.lastName) : that.lastName == null;
