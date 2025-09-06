@@ -1,308 +1,423 @@
 package com.weather_found.weather_app.modules.event.controller;
 
+import com.weather_found.weather_app.modules.event.dto.request.*;
+import com.weather_found.weather_app.modules.event.dto.response.*;
+import com.weather_found.weather_app.modules.event.service.EventService;
+import com.weather_found.weather_app.modules.shared.Base.BaseResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Max;
+import java.time.LocalDateTime;
+import java.util.List;
 
 /**
- * REST controller for event management
+ * REST Controller for Event Management
+ * Provides comprehensive CRUD operations and event features
+ *
+ * @author Weather App Team
+ * @version 1.0
  */
 @RestController
-@RequestMapping("/api/events")
-@CrossOrigin(origins = "*", maxAge = 3600)
-@Tag(name = "Event Management", description = "Outdoor event planning and management endpoints")
-@SecurityRequirement(name = "bearerAuth")
+@RequestMapping("/api/v1/events")
+@RequiredArgsConstructor
+@Validated
+@Tag(name = "Event Management", description = "Event CRUD operations and management features")
 public class EventController {
 
-    /**
-     * Get user's events
-     */
-    @GetMapping
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    @Operation(summary = "Get user events", description = "Get all events for the current user")
-    public ResponseEntity<String> getUserEvents(Authentication authentication) {
-        String username = authentication.getName();
-        String eventsData = """
-                {
-                    "user": "%s",
-                    "totalEvents": 8,
-                    "upcomingEvents": 3,
-                    "events": [
-                        {
-                            "id": 1,
-                            "title": "Beach Volleyball Tournament",
-                            "date": "2025-09-15",
-                            "time": "10:00",
-                            "location": "Santa Monica Beach",
-                            "status": "confirmed",
-                            "weatherForecast": "Sunny, 24°C"
-                        },
-                        {
-                            "id": 2,
-                            "title": "Hiking Adventure",
-                            "date": "2025-09-20",
-                            "time": "07:00",
-                            "location": "Yosemite National Park",
-                            "status": "pending",
-                            "weatherForecast": "Partly cloudy, 18°C"
-                        },
-                        {
-                            "id": 3,
-                            "title": "Outdoor Concert",
-                            "date": "2025-09-25",
-                            "time": "19:00",
-                            "location": "Central Park",
-                            "status": "confirmed",
-                            "weatherForecast": "Clear, 22°C"
-                        }
-                    ]
-                }
-                """.formatted(username);
-        return ResponseEntity.ok(eventsData);
-    }
+    private final EventService eventService;
+
+    // ==================== CREATE OPERATIONS ====================
 
     /**
-     * Create new event
+     * Create a new event
      */
     @PostMapping
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    @Operation(summary = "Create event", description = "Create a new outdoor event")
-    public ResponseEntity<String> createEvent(@RequestBody String eventData, Authentication authentication) {
-        String username = authentication.getName();
-        String createdEvent = """
-                {
-                    "status": "success",
-                    "message": "Event created successfully",
-                    "event": {
-                        "id": 9,
-                        "title": "New Outdoor Event",
-                        "createdBy": "%s",
-                        "createdAt": "%s",
-                        "status": "pending",
-                        "location": "TBD",
-                        "date": "2025-09-30",
-                        "time": "14:00",
-                        "attendeesCount": 0,
-                        "weatherPrediction": "Will be updated closer to date"
-                    },
-                    "nextSteps": [
-                        "Add event details",
-                        "Invite participants",
-                        "Monitor weather forecast"
-                    ]
-                }
-                """.formatted(username, java.time.Instant.now().toString());
-        return ResponseEntity.ok(createdEvent);
-    }
-
-    /**
-     * Get event details
-     */
-    @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    @Operation(summary = "Get event details", description = "Get detailed information about a specific event")
-    public ResponseEntity<String> getEventDetails(@PathVariable Long id, Authentication authentication) {
-        String eventDetails = """
-                {
-                    "id": %d,
-                    "title": "Beach Volleyball Tournament",
-                    "description": "Annual beach volleyball tournament for all skill levels",
-                    "date": "2025-09-15",
-                    "time": "10:00",
-                    "duration": "6 hours",
-                    "location": {
-                        "name": "Santa Monica Beach",
-                        "address": "Santa Monica, CA 90401",
-                        "coordinates": {"lat": 34.0195, "lng": -118.4912}
-                    },
-                    "organizer": "beach_volleyball_club",
-                    "status": "confirmed",
-                    "attendees": {
-                        "registered": 24,
-                        "limit": 32,
-                        "waitlist": 3
-                    },
-                    "weatherForecast": {
-                        "condition": "Sunny",
-                        "temperature": "24°C",
-                        "humidity": "65%%",
-                        "windSpeed": "12 km/h",
-                        "chanceOfRain": "5%%"
-                    },
-                    "equipment": ["Volleyball nets", "Balls", "First aid kit"],
-                    "requirements": ["Swimwear", "Sunscreen", "Water bottle"]
-                }
-                """.formatted(id);
-        return ResponseEntity.ok(eventDetails);
-    }
-
-    /**
-     * Update event
-     */
-    @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    @Operation(summary = "Update event", description = "Update an existing event")
-    public ResponseEntity<String> updateEvent(@PathVariable Long id, @RequestBody String eventData,
+    @Operation(summary = "Create a new event", description = "Creates a new event with the provided details")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Event created successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid input data"),
+            @ApiResponse(responseCode = "409", description = "Event conflict exists"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<BaseResponse<EventResponseDto>> createEvent(
+            @Valid @RequestBody EventCreateDto eventCreateDto,
             Authentication authentication) {
-        String updatedEvent = """
-                {
-                    "status": "success",
-                    "message": "Event updated successfully",
-                    "event": {
-                        "id": %d,
-                        "title": "Updated Event Title",
-                        "lastModified": "%s",
-                        "modifiedBy": "%s",
-                        "changes": [
-                            "Title updated",
-                            "Location changed",
-                            "Time modified"
-                        ]
-                    },
-                    "notifications": {
-                        "attendeesNotified": true,
-                        "emailsSent": 24,
-                        "pushNotificationsSent": 18
-                    }
-                }
-                """.formatted(id, java.time.Instant.now().toString(), authentication.getName());
-        return ResponseEntity.ok(updatedEvent);
+
+        String username = authentication.getName();
+
+        EventResponseDto createdEvent = eventService.createEvent(eventCreateDto, username);
+        BaseResponse<EventResponseDto> response = BaseResponse.<EventResponseDto>builder()
+                .success(true)
+                .message("Event created successfully")
+                .data(createdEvent)
+                .build();
+
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
+    // ==================== READ OPERATIONS ====================
+
     /**
-     * Delete event
+     * Get event by ID
      */
-    @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    @Operation(summary = "Delete event", description = "Delete an existing event")
-    public ResponseEntity<String> deleteEvent(@PathVariable Long id, Authentication authentication) {
-        String deletionResult = """
-                {
-                    "status": "success",
-                    "message": "Event deleted successfully",
-                    "deletedEvent": {
-                        "id": %d,
-                        "title": "Deleted Event",
-                        "deletedAt": "%s",
-                        "deletedBy": "%s"
-                    },
-                    "cleanup": {
-                        "attendeesNotified": true,
-                        "refundsProcessed": 0,
-                        "dataArchived": true
-                    },
-                    "relatedActions": [
-                        "Notification sent to 24 attendees",
-                        "Calendar invites cancelled",
-                        "Resources deallocated"
-                    ]
-                }
-                """.formatted(id, java.time.Instant.now().toString(), authentication.getName());
-        return ResponseEntity.ok(deletionResult);
+    @GetMapping("/{eventId}")
+    @Operation(summary = "Get event by ID", description = "Retrieves an event by its unique identifier")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Event found and returned"),
+            @ApiResponse(responseCode = "404", description = "Event not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<BaseResponse<EventResponseDto>> getEventById(
+            @Parameter(description = "Event ID", required = true, example = "1") @PathVariable Long eventId,
+            Authentication authentication) {
+
+        String username = authentication.getName();
+
+        EventResponseDto event = eventService.getEventById(eventId, username);
+        BaseResponse<EventResponseDto> response = BaseResponse.<EventResponseDto>builder()
+                .success(true)
+                .message("Event retrieved successfully")
+                .data(event)
+                .build();
+
+        return ResponseEntity.ok(response);
     }
 
     /**
-     * Get weather prediction for event
+     * Get current user's events with pagination
      */
-    @GetMapping("/{id}/weather")
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    @Operation(summary = "Get event weather prediction", description = "Get weather prediction for a specific event")
-    public ResponseEntity<String> getEventWeatherPrediction(@PathVariable Long id, Authentication authentication) {
-        String weatherPrediction = """
-                {
-                    "eventId": %d,
-                    "eventTitle": "Beach Volleyball Tournament",
-                    "eventDate": "2025-09-15",
-                    "eventTime": "10:00",
-                    "location": "Santa Monica Beach",
-                    "prediction": {
-                        "accuracy": "89%%",
-                        "confidence": "high",
-                        "lastUpdated": "%s",
-                        "forecast": {
-                            "condition": "Sunny",
-                            "temperature": {
-                                "min": "20°C",
-                                "max": "26°C",
-                                "average": "24°C"
-                            },
-                            "precipitation": {
-                                "chanceOfRain": "5%%",
-                                "expectedAmount": "0mm"
-                            },
-                            "wind": {
-                                "speed": "12 km/h",
-                                "direction": "Southwest",
-                                "gusts": "18 km/h"
-                            },
-                            "humidity": "65%%",
-                            "uvIndex": "7 (High)"
-                        }
-                    },
-                    "recommendations": [
-                        "Perfect conditions for outdoor activities",
-                        "Bring sunscreen and water",
-                        "Light wind may affect ball trajectory slightly"
-                    ]
-                }
-                """.formatted(id, java.time.Instant.now().toString());
-        return ResponseEntity.ok(weatherPrediction);
+    @GetMapping
+    @Operation(summary = "Get user events", description = "Retrieves paginated list of current user's events")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Events retrieved successfully"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<BaseResponse<EventPageResponseDto>> getUserEvents(
+            @Parameter(description = "Page number (0-based)", example = "0") @RequestParam(defaultValue = "0") @Min(0) int page,
+
+            @Parameter(description = "Number of items per page", example = "10") @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size,
+
+            Authentication authentication) {
+
+        String username = authentication.getName();
+
+        Pageable pageable = PageRequest.of(page, size);
+        EventPageResponseDto events = eventService.getUserEventsPageable(username, pageable);
+
+        BaseResponse<EventPageResponseDto> response = BaseResponse.<EventPageResponseDto>builder()
+                .success(true)
+                .message("Events retrieved successfully")
+                .data(events)
+                .build();
+
+        return ResponseEntity.ok(response);
     }
 
     /**
-     * Get all events - Admin only
+     * Get all user's events (no pagination)
      */
     @GetMapping("/all")
-    @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Get all events", description = "Get all events in the system (Admin only)")
-    public ResponseEntity<String> getAllEvents(Authentication authentication) {
-        String allEventsData = """
-                {
-                    "totalEvents": 156,
-                    "activeEvents": 89,
-                    "completedEvents": 67,
-                    "upcomingEvents": 34,
-                    "events": [
-                        {
-                            "id": 1,
-                            "title": "Beach Volleyball Tournament",
-                            "organizer": "user123",
-                            "date": "2025-09-15",
-                            "location": "Santa Monica Beach",
-                            "status": "confirmed",
-                            "attendees": 24
-                        },
-                        {
-                            "id": 2,
-                            "title": "Mountain Hiking Trip",
-                            "organizer": "user456",
-                            "date": "2025-09-20",
-                            "location": "Yosemite National Park",
-                            "status": "pending",
-                            "attendees": 12
-                        },
-                        {
-                            "id": 3,
-                            "title": "Outdoor Music Festival",
-                            "organizer": "user789",
-                            "date": "2025-09-25",
-                            "location": "Central Park",
-                            "status": "confirmed",
-                            "attendees": 156
-                        }
-                    ],
-                    "statistics": {
-                        "averageAttendees": 18.5,
-                        "popularLocations": ["Central Park", "Santa Monica Beach", "Golden Gate Park"],
-                        "eventsByMonth": {"September": 45, "October": 38, "November": 23}
-                    }
-                }
-                """;
-        return ResponseEntity.ok(allEventsData);
+    @Operation(summary = "Get all user events", description = "Retrieves all events for the current user")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Events retrieved successfully"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<BaseResponse<List<EventSummaryDto>>> getAllUserEvents(
+            Authentication authentication) {
+
+        String username = authentication.getName();
+
+        List<EventSummaryDto> events = eventService.getUserEvents(username);
+
+        BaseResponse<List<EventSummaryDto>> response = BaseResponse.<List<EventSummaryDto>>builder()
+                .success(true)
+                .message("All events retrieved successfully")
+                .data(events)
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+    // ==================== UPDATE OPERATIONS ====================
+
+    /**
+     * Update an existing event
+     */
+    @PutMapping("/{eventId}")
+    @Operation(summary = "Update event", description = "Updates an existing event with new details")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Event updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid input data"),
+            @ApiResponse(responseCode = "404", description = "Event not found"),
+            @ApiResponse(responseCode = "409", description = "Event conflict exists"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<BaseResponse<EventResponseDto>> updateEvent(
+            @Parameter(description = "Event ID", required = true, example = "1") @PathVariable Long eventId,
+
+            @Valid @RequestBody EventUpdateDto eventUpdateDto,
+            Authentication authentication) {
+
+        String username = authentication.getName();
+
+        EventResponseDto updatedEvent = eventService.updateEvent(eventId, eventUpdateDto, username);
+
+        BaseResponse<EventResponseDto> response = BaseResponse.<EventResponseDto>builder()
+                .success(true)
+                .message("Event updated successfully")
+                .data(updatedEvent)
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+    // ==================== DELETE OPERATIONS ====================
+
+    /**
+     * Delete an event
+     */
+    @DeleteMapping("/{eventId}")
+    @Operation(summary = "Delete event", description = "Deletes an event by its ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Event deleted successfully"),
+            @ApiResponse(responseCode = "404", description = "Event not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<BaseResponse<MessageResponseDto>> deleteEvent(
+            @Parameter(description = "Event ID", required = true, example = "1") @PathVariable Long eventId,
+            Authentication authentication) {
+
+        String username = authentication.getName();
+
+        MessageResponseDto result = eventService.deleteEvent(eventId, username);
+
+        BaseResponse<MessageResponseDto> response = BaseResponse.<MessageResponseDto>builder()
+                .success(true)
+                .message("Event deleted successfully")
+                .data(result)
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+    // ==================== SEARCH OPERATIONS ====================
+
+    /**
+     * Search events
+     */
+    @PostMapping("/search")
+    @Operation(summary = "Search events", description = "Searches events based on criteria")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Search completed successfully"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<BaseResponse<List<EventSummaryDto>>> searchEvents(
+            @Valid @RequestBody EventSearchDto searchDto,
+            Authentication authentication) {
+
+        String username = authentication.getName();
+
+        List<EventSummaryDto> events = eventService.searchEvents(searchDto, username);
+
+        BaseResponse<List<EventSummaryDto>> response = BaseResponse.<List<EventSummaryDto>>builder()
+                .success(true)
+                .message("Search completed successfully")
+                .data(events)
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Get upcoming events
+     */
+    @GetMapping("/upcoming")
+    @Operation(summary = "Get upcoming events", description = "Retrieves events scheduled for the future")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Upcoming events retrieved successfully"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<BaseResponse<List<EventSummaryDto>>> getUpcomingEvents(
+            Authentication authentication) {
+
+        String username = authentication.getName();
+
+        List<EventSummaryDto> events = eventService.getUpcomingEvents(username);
+
+        BaseResponse<List<EventSummaryDto>> response = BaseResponse.<List<EventSummaryDto>>builder()
+                .success(true)
+                .message("Upcoming events retrieved successfully")
+                .data(events)
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Get conflicting events
+     */
+    @GetMapping("/conflicts")
+    @Operation(summary = "Get conflicting events", description = "Checks for events that conflict with the specified time range")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Conflict check completed successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid date parameters"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<BaseResponse<List<EventSummaryDto>>> getConflictingEvents(
+            @Parameter(description = "Start date and time", required = true) @RequestParam String startDate,
+
+            @Parameter(description = "End date and time", required = true) @RequestParam String endDate,
+
+            Authentication authentication) {
+
+        String username = authentication.getName();
+
+        LocalDateTime start = LocalDateTime.parse(startDate);
+        LocalDateTime end = LocalDateTime.parse(endDate);
+
+        List<EventSummaryDto> conflicts = eventService.getConflictingEvents(start, end, username);
+
+        BaseResponse<List<EventSummaryDto>> response = BaseResponse.<List<EventSummaryDto>>builder()
+                .success(true)
+                .message("Conflict check completed successfully")
+                .data(conflicts)
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+    // ==================== STATISTICS OPERATIONS ====================
+
+    /**
+     * Get event statistics for current user
+     */
+    @GetMapping("/stats")
+    @Operation(summary = "Get user event statistics", description = "Retrieves event statistics for the current user")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Statistics retrieved successfully"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<BaseResponse<EventStatisticsDto>> getUserEventStats(
+            Authentication authentication) {
+
+        String username = authentication.getName();
+
+        EventStatisticsDto stats = eventService.getUserEventStatistics(username);
+
+        BaseResponse<EventStatisticsDto> response = BaseResponse.<EventStatisticsDto>builder()
+                .success(true)
+                .message("Statistics retrieved successfully")
+                .data(stats)
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+    // ==================== UTILITY OPERATIONS ====================
+
+    /**
+     * Check if event name is available
+     */
+    @GetMapping("/check-name")
+    @Operation(summary = "Check event name availability", description = "Checks if an event name is available for the user")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Check completed successfully"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<BaseResponse<Boolean>> checkEventNameAvailability(
+            @Parameter(description = "Event name to check", required = true) @RequestParam String eventName,
+            Authentication authentication) {
+
+        String username = authentication.getName();
+
+        boolean isAvailable = eventService.isEventNameAvailable(eventName, username);
+
+        BaseResponse<Boolean> response = BaseResponse.<Boolean>builder()
+                .success(true)
+                .message("Check completed successfully")
+                .data(isAvailable)
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+    // ==================== TEST DATA OPERATIONS (Development Only)
+    // ====================
+
+    /**
+     * Create sample test events for development
+     */
+    @PostMapping("/create-test-data")
+    @Operation(summary = "Create test events", description = "Creates sample events for testing (Development only)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Test events created successfully"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<BaseResponse<String>> createTestEvents(Authentication authentication) {
+
+        String username = authentication.getName();
+
+        // Create multiple test events
+        try {
+            // Event 1: Beach Sports
+            EventCreateDto event1 = new EventCreateDto();
+            event1.setEventName("Beach Sports Tournament");
+            event1.setEventDescription(
+                    "Annual beach sports tournament for all skill levels - volleyball, football, and more!");
+            event1.setStartDate(java.time.LocalDateTime.now().plusDays(7));
+            event1.setEndDate(java.time.LocalDateTime.now().plusDays(7).plusHours(8));
+            event1.setEventType(com.weather_found.weather_app.modules.event.model.enums.EventType.SPORTS);
+            event1.setIsOutdoor(true);
+            eventService.createEvent(event1, username);
+
+            // Event 2: Tech Workshop
+            EventCreateDto event2 = new EventCreateDto();
+            event2.setEventName("Spring Boot Workshop");
+            event2.setEventDescription("Hands-on workshop covering advanced Spring Boot concepts and best practices");
+            event2.setStartDate(java.time.LocalDateTime.now().plusDays(14));
+            event2.setEndDate(java.time.LocalDateTime.now().plusDays(14).plusHours(6));
+            event2.setEventType(com.weather_found.weather_app.modules.event.model.enums.EventType.WORKSHOP);
+            event2.setIsOutdoor(false);
+            eventService.createEvent(event2, username);
+
+            // Event 3: Music Festival
+            EventCreateDto event3 = new EventCreateDto();
+            event3.setEventName("Summer Music Festival");
+            event3.setEventDescription("Live music performances featuring local and international artists");
+            event3.setStartDate(java.time.LocalDateTime.now().plusDays(21));
+            event3.setEndDate(java.time.LocalDateTime.now().plusDays(21).plusHours(12));
+            event3.setEventType(com.weather_found.weather_app.modules.event.model.enums.EventType.FESTIVAL);
+            event3.setIsOutdoor(true);
+            eventService.createEvent(event3, username);
+
+            BaseResponse<String> response = BaseResponse.<String>builder()
+                    .success(true)
+                    .message("Test events created successfully")
+                    .data("Created 3 test events for user: " + username)
+                    .build();
+
+            return new ResponseEntity<>(response, HttpStatus.CREATED);
+
+        } catch (Exception e) {
+            BaseResponse<String> response = BaseResponse.<String>builder()
+                    .success(false)
+                    .message("Failed to create test events: " + e.getMessage())
+                    .build();
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }
