@@ -14,7 +14,7 @@ public class UserCreateDto {
     private final String lastName;
     private final String role; // Role name: USER, ADMIN
 
-    public UserCreateDto(String username, String email, String password, 
+    public UserCreateDto(String username, String email, String password,
                         String firstName, String lastName, String role) {
         this.username = username;
         this.email = email;
@@ -57,9 +57,9 @@ public class UserCreateDto {
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
-        
+
         UserCreateDto that = (UserCreateDto) obj;
-        
+
         if (username != null ? !username.equals(that.username) : that.username != null) return false;
         if (email != null ? !email.equals(that.email) : that.email != null) return false;
         if (password != null ? !password.equals(that.password) : that.password != null) return false;
