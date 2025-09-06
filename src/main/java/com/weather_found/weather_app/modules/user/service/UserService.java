@@ -30,6 +30,7 @@ public class UserService {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
     }
+
     /**
      * Get All Users - For admin purposes (not exposed via controller yet)
      */
@@ -88,7 +89,8 @@ public class UserService {
             return userMapper.toResponseDto(savedUser);
 
         } catch (DataAccessException e) {
-            logger.error("AUDIT: Database error updating user profile for username: {}, error: {}", username, e.getMessage());
+            logger.error("AUDIT: Database error updating user profile for username: {}, error: {}", username,
+                    e.getMessage());
             throw new DatabaseOperationException("Failed to update user profile", e);
         }
     }
@@ -115,8 +117,7 @@ public class UserService {
                 true,
                 false,
                 "UTC",
-                null
-        );
+                null);
     }
 
     /**
@@ -144,8 +145,7 @@ public class UserService {
                 preferencesDto.getPushNotifications(),
                 preferencesDto.getSmsNotifications(),
                 preferencesDto.getTimezone(),
-                preferencesDto.getDefaultLocationId()
-        );
+                preferencesDto.getDefaultLocationId());
     }
 
     /**
@@ -166,7 +166,8 @@ public class UserService {
             logger.info("AUDIT: User account deleted successfully for username: {}", username);
 
         } catch (DataAccessException e) {
-            logger.error("AUDIT: Database error deleting user account for username: {}, error: {}", username, e.getMessage());
+            logger.error("AUDIT: Database error deleting user account for username: {}, error: {}", username,
+                    e.getMessage());
             throw new DatabaseOperationException("Failed to delete user account", e);
         }
     }
