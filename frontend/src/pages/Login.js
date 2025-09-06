@@ -424,6 +424,31 @@ const Login = () => {
           borderTop: '1px solid rgba(255, 255, 255, 0.2)',
           paddingTop: '2rem'
         }}>
+          {/* Forgot Password Link */}
+          <div style={{ marginBottom: '1.5rem' }}>
+            <Link
+              to="/forgot-password"
+              style={{
+                color: 'rgba(255, 255, 255, 0.8)',
+                textDecoration: 'none',
+                fontSize: '0.95rem',
+                transition: 'all 0.3s ease',
+                padding: '0.5rem',
+                borderRadius: '10px'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.color = 'var(--light-blue)';
+                e.target.style.background = 'rgba(255, 255, 255, 0.1)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.color = 'rgba(255, 255, 255, 0.8)';
+                e.target.style.background = 'transparent';
+              }}
+            >
+              🔑 Forgot your password?
+            </Link>
+          </div>
+
           <p style={{
             color: 'rgba(255, 255, 255, 0.8)',
             fontSize: '1rem',
@@ -449,7 +474,7 @@ const Login = () => {
             onMouseEnter={(e) => {
               e.target.style.background = 'rgba(135, 206, 235, 0.2)';
               e.target.style.transform = 'translateY(-2px)';
-              e.target.style.boxShadow = '0 10px 25px rgba(135, 206, 235, 0.3)';
+              e.target.style.boxShadow = '0 8px 25px rgba(135, 206, 235, 0.3)';
             }}
             onMouseLeave={(e) => {
               e.target.style.background = 'rgba(135, 206, 235, 0.1)';

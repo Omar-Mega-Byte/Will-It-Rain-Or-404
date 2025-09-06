@@ -2,6 +2,22 @@ import axios from 'axios';
 
 const API_URL = '/api/auth';
 
+// Flag to prevent multiple refresh attempts
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+
+  failedQueue = [];
+};
+
 // Set up axios interceptor to include JWT token in requests
 axios.interceptors.request.use(
   (config) => {
@@ -20,15 +36,61 @@ axios.interceptors.request.use(
   }
 );
 
-// Response interceptor to handle token expiration
+// Enhanced response interceptor with automatic token refresh
 axios.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
+    const originalRequest = error.config;
+
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        // If already refreshing, queue this request
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        }).then(token => {
+          originalRequest.headers['Authorization'] = 'Bearer ' + token;
+          return axios(originalRequest);
+        }).catch(err => {
+          return Promise.reject(err);
+        });
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      try {
+        const refreshToken = localStorage.getItem('token');
+        if (refreshToken) {
+          const response = await axios.post(`${API_URL}/refresh`, {
+            refreshToken: refreshToken
+          });
+
+          const { token } = response.data;
+          localStorage.setItem('token', token);
+          localStorage.setItem('user', JSON.stringify(response.data.user));
+
+          processQueue(null, token);
+          originalRequest.headers['Authorization'] = 'Bearer ' + token;
+
+          return axios(originalRequest);
+        }
+      } catch (refreshError) {
+        processQueue(refreshError, null);
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+      } finally {
+        isRefreshing = false;
+      }
+    }
+
+    // For non-401 errors or if refresh failed
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/login';
     }
+
     return Promise.reject(error);
   }
 );
@@ -106,9 +168,87 @@ const authService = {
     }
   },
 
-  logout() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+  async logout() {
+    try {
+      // Call backend logout endpoint to invalidate token
+      await axios.post(`${API_URL}/logout`);
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Continue with local logout even if backend call fails
+    } finally {
+      // Always clear local storage
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+    }
+  },
+
+  async refreshToken() {
+    try {
+      const currentToken = this.getToken();
+      if (!currentToken) {
+        throw new Error('No token available to refresh');
+      }
+
+      const response = await axios.post(`${API_URL}/refresh`, {
+        refreshToken: currentToken
+      });
+
+      if (response.data.token) {
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+      }
+
+      return response.data;
+    } catch (error) {
+      console.error('Token refresh error:', error);
+
+      // If refresh fails, logout user
+      this.logout();
+      window.location.href = '/login';
+
+      const errorMessage = error.response?.data?.message ||
+        error.response?.data?.error ||
+        error.message ||
+        'Token refresh failed';
+      throw errorMessage;
+    }
+  },
+
+  async forgotPassword(email) {
+    try {
+      const response = await axios.post(`${API_URL}/forgot-password`, {
+        email
+      });
+
+      return response.data;
+    } catch (error) {
+      console.error('Forgot password error:', error);
+
+      const errorMessage = error.response?.data?.message ||
+        error.response?.data?.error ||
+        error.message ||
+        'Failed to send password reset email';
+      throw errorMessage;
+    }
+  },
+
+  async resetPassword(token, newPassword) {
+    try {
+      const response = await axios.post(`${API_URL}/reset-password`, {
+        token,
+        newPassword
+      });
+
+      return response.data;
+    } catch (error) {
+      console.error('Reset password error:', error);
+
+      const errorMessage = error.response?.data?.message ||
+        error.response?.data?.error ||
+        error.message ||
+        'Failed to reset password';
+      throw errorMessage;
+    }
   },
 
   getCurrentUser() {
