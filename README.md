@@ -344,7 +344,6 @@ This project was developed for the NASA Space Apps Challenge 2025, focusing on u
 ## 👥 Team
 
 - **Omar-Mega-Byte** - Project Lead & Full-Stack Developer
-- [Add team members as needed]
 
 ## 🙏 Acknowledgments
 
