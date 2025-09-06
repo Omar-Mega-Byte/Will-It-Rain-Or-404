@@ -19,8 +19,8 @@ public class UserResponseDto {
     private final Instant createdAt;
     private final Instant updatedAt;
 
-    public UserResponseDto(Long id, String username, String email, String firstName, 
-                          String lastName, boolean isActive, Set<String> roles, 
+    public UserResponseDto(Long id, String username, String email, String firstName,
+                          String lastName, boolean isActive, Set<String> roles,
                           Instant createdAt, Instant updatedAt) {
         this.id = id;
         this.username = username;
@@ -73,9 +73,9 @@ public class UserResponseDto {
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
-        
+
         UserResponseDto that = (UserResponseDto) obj;
-        
+
         if (isActive != that.isActive) return false;
         if (id != null ? !id.equals(that.id) : that.id != null) return false;
         if (username != null ? !username.equals(that.username) : that.username != null) return false;
