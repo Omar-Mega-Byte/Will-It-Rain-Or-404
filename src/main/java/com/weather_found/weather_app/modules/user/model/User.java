@@ -36,7 +36,8 @@ public class User extends BaseEntity {
         }
 
         // Constructor with all fields
-        public User(String username, String email, String password, String firstName, String lastName, boolean isActive) {
+        public User(String username, String email, String password, String firstName, String lastName,
+                        boolean isActive) {
                 super();
                 this.username = username;
                 this.email = email;
@@ -97,17 +98,25 @@ public class User extends BaseEntity {
 
         @Override
         public boolean equals(Object obj) {
-                if (this == obj) return true;
-                if (obj == null || getClass() != obj.getClass()) return false;
-                if (!super.equals(obj)) return false;
-                
+                if (this == obj)
+                        return true;
+                if (obj == null || getClass() != obj.getClass())
+                        return false;
+                if (!super.equals(obj))
+                        return false;
+
                 User user = (User) obj;
-                
-                if (isActive != user.isActive) return false;
-                if (username != null ? !username.equals(user.username) : user.username != null) return false;
-                if (email != null ? !email.equals(user.email) : user.email != null) return false;
-                if (password != null ? !password.equals(user.password) : user.password != null) return false;
-                if (firstName != null ? !firstName.equals(user.firstName) : user.firstName != null) return false;
+
+                if (isActive != user.isActive)
+                        return false;
+                if (username != null ? !username.equals(user.username) : user.username != null)
+                        return false;
+                if (email != null ? !email.equals(user.email) : user.email != null)
+                        return false;
+                if (password != null ? !password.equals(user.password) : user.password != null)
+                        return false;
+                if (firstName != null ? !firstName.equals(user.firstName) : user.firstName != null)
+                        return false;
                 return lastName != null ? lastName.equals(user.lastName) : user.lastName == null;
         }
 
@@ -126,15 +135,15 @@ public class User extends BaseEntity {
         @Override
         public String toString() {
                 return "User{" +
-                        "id=" + getId() +
-                        ", username='" + username + '\'' +
-                        ", email='" + email + '\'' +
-                        ", password='[PROTECTED]'" +
-                        ", firstName='" + firstName + '\'' +
-                        ", lastName='" + lastName + '\'' +
-                        ", isActive=" + isActive +
-                        ", createdAt=" + getCreatedAt() +
-                        ", updatedAt=" + getUpdatedAt() +
-                        '}';
+                                "id=" + getId() +
+                                ", username='" + username + '\'' +
+                                ", email='" + email + '\'' +
+                                ", password='[PROTECTED]'" +
+                                ", firstName='" + firstName + '\'' +
+                                ", lastName='" + lastName + '\'' +
+                                ", isActive=" + isActive +
+                                ", createdAt=" + getCreatedAt() +
+                                ", updatedAt=" + getUpdatedAt() +
+                                '}';
         }
 }

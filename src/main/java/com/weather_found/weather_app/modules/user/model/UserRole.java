@@ -59,9 +59,9 @@ public class UserRole extends BaseEntity {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
         if (!super.equals(obj)) return false;
-        
+
         UserRole userRole = (UserRole) obj;
-        
+
         if (user != null ? !user.equals(userRole.user) : userRole.user != null) return false;
         return role != null ? role.equals(userRole.role) : userRole.role == null;
     }

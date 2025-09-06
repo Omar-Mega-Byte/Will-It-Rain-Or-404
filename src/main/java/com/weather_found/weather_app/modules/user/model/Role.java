@@ -49,9 +49,9 @@ public class Role extends BaseEntity {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
         if (!super.equals(obj)) return false;
-        
+
         Role role = (Role) obj;
-        
+
         if (name != null ? !name.equals(role.name) : role.name != null) return false;
         return description != null ? description.equals(role.description) : role.description == null;
     }
