@@ -10,6 +10,9 @@ import org.springframework.stereotype.Service;
 
 import com.weather_found.weather_app.modules.shared.utils.JwtUtils;
 import com.weather_found.weather_app.modules.user.dto.request.LoginRequestDto;
+import com.weather_found.weather_app.modules.user.dto.request.PasswordResetConfirmDto;
+import com.weather_found.weather_app.modules.user.dto.request.PasswordResetRequestDto;
+import com.weather_found.weather_app.modules.user.dto.request.RefreshTokenRequestDto;
 import com.weather_found.weather_app.modules.user.dto.request.UserCreateDto;
 import com.weather_found.weather_app.modules.user.dto.response.JwtResponseDto;
 import com.weather_found.weather_app.modules.user.dto.response.UserResponseDto;
@@ -24,6 +27,7 @@ import com.weather_found.weather_app.modules.user.repository.UserRepository;
 import com.weather_found.weather_app.modules.user.repository.UserRoleRepository;
 import com.weather_found.weather_app.modules.user.validation.UserValidation;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -192,5 +196,117 @@ public class AuthService {
         LoginRequestDto loginRequest = new LoginRequestDto(username, password);
         JwtResponseDto jwtResponse = loginUser(loginRequest);
         return jwtResponse.getUser();
+    }
+
+    /**
+     * Logout user and invalidate token
+     */
+    public void logoutUser(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String jwt = authHeader.substring(7);
+            String username = jwtUtils.getUsernameFromJwtToken(jwt);
+            logger.info("AUDIT: User logout - username: {}", username);
+
+            // TODO: Implement token blacklist for complete logout
+            // For now, just log the logout event
+        }
+    }
+
+    /**
+     * Refresh JWT token
+     */
+    public JwtResponseDto refreshToken(RefreshTokenRequestDto refreshRequest) {
+        logger.info("AUDIT: Token refresh attempt");
+
+        try {
+            String refreshToken = refreshRequest.getRefreshToken();
+
+            // Validate the refresh token
+            if (!jwtUtils.validateJwtToken(refreshToken)) {
+                logger.warn("AUDIT: Token refresh failed - invalid refresh token");
+                throw new InvalidUserException("Invalid refresh token");
+            }
+
+            String username = jwtUtils.getUsernameFromJwtToken(refreshToken);
+            User user = userRepository.findByUsername(username)
+                    .orElseThrow(() -> {
+                        logger.warn("AUDIT: Token refresh failed - user not found: {}", username);
+                        return new InvalidUserException("User not found");
+                    });
+
+            // Generate new JWT token
+            String newJwt = jwtUtils.generateJwtToken(user.getUsername());
+
+            logger.info("AUDIT: Token refresh successful - username: {}", username);
+            UserResponseDto userResponse = userMapper.toResponseDto(user);
+            return JwtResponseDto.of(newJwt, userResponse);
+
+        } catch (Exception e) {
+            logger.error("AUDIT: Token refresh failed - error: {}", e.getMessage());
+            throw new InvalidUserException("Token refresh failed: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Send password reset email
+     */
+    public void sendPasswordResetEmail(PasswordResetRequestDto resetRequest) {
+        logger.info("AUDIT: Password reset request for email: {}", resetRequest.getEmail());
+
+        try {
+            String normalizedEmail = resetRequest.getEmail().trim().toLowerCase();
+            User user = userRepository.findByEmail(normalizedEmail)
+                    .orElseThrow(() -> {
+                        logger.warn("AUDIT: Password reset failed - user not found for email: {}", normalizedEmail);
+                        return new InvalidUserException("User not found with email: " + normalizedEmail);
+                    });
+
+            // TODO: Implement actual email sending with reset token
+            // For now, just log the reset request
+            logger.info("AUDIT: Password reset email would be sent to: {} for user: {}",
+                       normalizedEmail, user.getUsername());
+
+        } catch (DataAccessException e) {
+            logger.error("AUDIT: Database error during password reset request - email: {}, error: {}",
+                        resetRequest.getEmail(), e.getMessage());
+            throw new DatabaseOperationException("Database operation failed during password reset", e);
+        }
+    }
+
+    /**
+     * Reset password using reset token
+     */
+    @Transactional
+    public void resetPassword(PasswordResetConfirmDto resetConfirm) {
+        logger.info("AUDIT: Password reset confirmation attempt");
+
+        try {
+            // TODO: Implement proper token validation and user lookup
+            // For now, this is a placeholder implementation
+
+            String token = resetConfirm.getToken();
+            String newPassword = resetConfirm.getNewPassword();
+
+            // Validate new password
+            if (newPassword == null || newPassword.trim().length() < 8) {
+                throw new InvalidUserException("Password must be at least 8 characters long");
+            }
+
+            // TODO: Validate reset token and get user
+            // For now, just log the reset attempt
+            logger.info("AUDIT: Password reset confirmation - token validation needed");
+
+            // TODO: Update user password
+            // String encodedPassword = passwordEncoder.encode(newPassword);
+            // user.setPassword(encodedPassword);
+            // userRepository.save(user);
+
+            logger.info("AUDIT: Password reset would be completed for token: {}", token);
+
+        } catch (Exception e) {
+            logger.error("AUDIT: Password reset failed - error: {}", e.getMessage());
+            throw new InvalidUserException("Password reset failed: " + e.getMessage());
+        }
     }
 }
