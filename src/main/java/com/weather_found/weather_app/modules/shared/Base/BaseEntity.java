@@ -61,9 +61,9 @@ public class BaseEntity {
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
-        
+
         BaseEntity that = (BaseEntity) obj;
-        
+
         return id != null ? id.equals(that.id) : that.id == null;
     }
 
