@@ -81,10 +81,16 @@ public class EventService {
 
         // Create and save event
         Event event = eventMapper.toEvent(createDto);
-        event.getUsers().add(user);
         Event savedEvent = eventRepository.save(event);
+        
+        // Add event to user's events list (User is the owning side of the relationship)
+        if (user.getEvents() == null) {
+            user.setEvents(new java.util.ArrayList<>());
+        }
+        user.getEvents().add(savedEvent);
+        userRepository.save(user);
 
-        log.info("Successfully created event with ID: {} for user '{}'", savedEvent.getId(), username);
+        log.info("Successfully created event with ID: {} for user '{}' and established user-event relationship", savedEvent.getId(), username);
         return eventMapper.toEventResponseDto(savedEvent);
     }
 
