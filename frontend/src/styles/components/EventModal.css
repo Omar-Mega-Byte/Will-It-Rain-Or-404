@@ -1,0 +1,588 @@
+/* ==========================================================================
+   EVENT MODAL COMPONENT STYLES
+   Modal for viewing, editing, and deleting events
+   ========================================================================== */
+
+.event-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+.event-modal-overlay.closing {
+  animation: fadeOut 0.2s ease-in forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+.event-modal {
+  background: white;
+  border-radius: 1.5rem;
+  max-width: 90vw;
+  max-height: 90vh;
+  width: 100%;
+  max-width: 60rem;
+  overflow-y: auto;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+  transform: scale(0.9) translateY(-10px);
+  opacity: 0;
+  animation: modalEnter 0.3s ease-out forwards;
+}
+
+.event-modal.closing {
+  animation: modalExit 0.2s ease-in forwards;
+}
+
+@keyframes modalEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes modalExit {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.9) translateY(-10px);
+  }
+}
+
+/* Modal Header */
+.event-modal-header {
+  padding: 2rem;
+  border-bottom: 1px solid #f3f4f6;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 1.5rem 1.5rem 0 0;
+}
+
+.event-modal-header-content {
+  flex: 1;
+  margin-right: 1rem;
+}
+
+.event-modal-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 0.5rem 0;
+  line-height: 1.3;
+}
+
+.event-modal-subtitle {
+  color: #6b7280;
+  font-size: 0.95rem;
+  margin: 0 0 1rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.event-modal-subtitle svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.event-modal-status {
+  display: inline-block;
+  padding: 0.4rem 0.875rem;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.event-modal-status.scheduled {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.event-modal-status.in-progress {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.event-modal-status.completed {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.event-modal-status.cancelled {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.event-modal-close {
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.event-modal-close:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.event-modal-close svg {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+/* Modal Body */
+.event-modal-body {
+  padding: 2rem;
+}
+
+.event-modal-section {
+  margin-bottom: 2rem;
+}
+
+.event-modal-section:last-child {
+  margin-bottom: 0;
+}
+
+.event-modal-section-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 1rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.event-modal-section-title svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #6b7280;
+}
+
+/* Description */
+.event-modal-description {
+  background: #f8fafc;
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  border: 1px solid #e2e8f0;
+  color: #374151;
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+/* Meta Information */
+.event-modal-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.event-modal-meta-item {
+  background: #f8fafc;
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  border: 1px solid #e2e8f0;
+}
+
+.event-modal-meta-label {
+  color: #6b7280;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 0.5rem 0;
+}
+
+.event-modal-meta-value {
+  color: #111827;
+  font-size: 0.95rem;
+  font-weight: 500;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.event-modal-meta-value svg {
+  width: 1rem;
+  height: 1rem;
+  color: #6b7280;
+}
+
+/* Weather Section */
+.event-modal-weather {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  border: 1px solid #bae6fd;
+}
+
+.event-modal-weather-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.event-modal-weather-info {
+  flex: 1;
+}
+
+.event-modal-weather-temp {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #0c4a6e;
+  margin: 0 0 0.25rem 0;
+}
+
+.event-modal-weather-condition {
+  color: #0369a1;
+  font-size: 1rem;
+  font-weight: 500;
+  margin: 0 0 1rem 0;
+}
+
+.event-modal-weather-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.event-modal-weather-detail {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #0369a1;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.event-modal-weather-detail svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.event-modal-weather-icon {
+  font-size: 3rem;
+  margin-left: 1rem;
+}
+
+/* Location Section */
+.event-modal-location {
+  background: #f0fdf4;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  border: 1px solid #bbf7d0;
+}
+
+.event-modal-location-address {
+  color: #166534;
+  font-size: 1rem;
+  font-weight: 500;
+  margin: 0 0 0.5rem 0;
+}
+
+.event-modal-location-details {
+  color: #15803d;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* Actions */
+.event-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding: 2rem;
+  border-top: 1px solid #f3f4f6;
+  background: #f8fafc;
+  border-radius: 0 0 1.5rem 1.5rem;
+}
+
+.event-modal-btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.event-modal-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.event-modal-btn svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.event-modal-btn-secondary {
+  background: white;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+
+.event-modal-btn-secondary:hover:not(:disabled) {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+.event-modal-btn-primary {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+}
+
+.event-modal-btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+}
+
+.event-modal-btn-danger {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+}
+
+.event-modal-btn-danger:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
+}
+
+/* Delete Confirmation Modal */
+.event-modal-delete-confirm {
+  text-align: center;
+  padding: 2rem;
+}
+
+.event-modal-delete-icon {
+  width: 4rem;
+  height: 4rem;
+  background: #fee2e2;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem auto;
+  color: #dc2626;
+}
+
+.event-modal-delete-icon svg {
+  width: 2rem;
+  height: 2rem;
+}
+
+.event-modal-delete-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 1rem 0;
+}
+
+.event-modal-delete-message {
+  color: #6b7280;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin: 0 0 2rem 0;
+}
+
+.event-modal-delete-event-name {
+  font-weight: 600;
+  color: #dc2626;
+}
+
+/* Loading States */
+.event-modal-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+}
+
+.event-modal-loading-spinner {
+  width: 3rem;
+  height: 3rem;
+  border: 4px solid #e5e7eb;
+  border-top: 4px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.event-modal-btn-loading {
+  position: relative;
+  pointer-events: none;
+}
+
+.event-modal-btn-loading::after {
+  content: '';
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Error State */
+.event-modal-error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  margin: 1rem 2rem;
+  text-align: center;
+}
+
+.event-modal-error-icon {
+  color: #dc2626;
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.event-modal-error-title {
+  color: #991b1b;
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+}
+
+.event-modal-error-message {
+  color: #7f1d1d;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .event-modal {
+    max-width: 95vw;
+    margin: 1rem;
+  }
+  
+  .event-modal-header,
+  .event-modal-body,
+  .event-modal-actions {
+    padding: 1.5rem;
+  }
+  
+  .event-modal-title {
+    font-size: 1.5rem;
+  }
+  
+  .event-modal-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+  
+  .event-modal-header-content {
+    margin-right: 0;
+  }
+  
+  .event-modal-close {
+    align-self: flex-end;
+  }
+  
+  .event-modal-meta {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .event-modal-weather-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .event-modal-weather-icon {
+    align-self: center;
+    margin-left: 0;
+  }
+  
+  .event-modal-actions {
+    flex-direction: column-reverse;
+    gap: 0.75rem;
+  }
+  
+  .event-modal-btn {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .event-modal-header,
+  .event-modal-body,
+  .event-modal-actions {
+    padding: 1rem;
+  }
+  
+  .event-modal-title {
+    font-size: 1.25rem;
+  }
+  
+  .event-modal-meta-item,
+  .event-modal-weather,
+  .event-modal-location,
+  .event-modal-description {
+    padding: 1rem;
+  }
+  
+  .event-modal-weather-temp {
+    font-size: 1.75rem;
+  }
+  
+  .event-modal-weather-details {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .event-modal-btn {
+    padding: 0.875rem 1rem;
+  }
+}
