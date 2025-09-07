@@ -1,0 +1,29 @@
+/* ==========================================================================
+   MAIN STYLES INDEX
+   Imports all component and page styles
+   ========================================================================== */
+
+/* Base Styles */
+@import './App.css';
+
+/* Page Styles */
+@import './pages/Dashboard.css';
+@import './pages/EnhancedDashboard.css';
+@import './pages/Events.css';
+@import './pages/Calendar.css';
+@import './pages/Home.css';
+@import './pages/Login.css';
+@import './pages/Register.css';
+
+/* Component Styles */
+@import './styles/components/Common.css';
+@import './styles/components/EventCard.css';
+@import './styles/components/EventForm.css';
+@import './styles/components/EventModal.css';
+@import './styles/components/EventSearch.css';
+
+/* Additional Component Styles (create as needed) */
+/* @import './styles/components/WeatherCard.css'; */
+/* @import './styles/components/EventCalendar.css'; */
+/* @import './styles/components/EventStats.css'; */
+/* @import './styles/components/UpcomingEvents.css'; */
