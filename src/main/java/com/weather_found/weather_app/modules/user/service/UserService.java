@@ -1,5 +1,9 @@
 package com.weather_found.weather_app.modules.user.service;
 
+import com.weather_found.weather_app.modules.user.model.UserPreferences;
+import com.weather_found.weather_app.modules.user.repository.UserPreferencesRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
@@ -98,26 +102,42 @@ public class UserService {
     /**
      * Get user preferences (placeholder implementation)
      */
+    @Autowired
+    private UserPreferencesRepository userPreferencesRepository;
+
     public UserPreferencesResponseDto getUserPreferences(String username) {
         logger.info("AUDIT: Getting user preferences for username: {}", username);
 
-        // Verify user exists
-        userRepository.findByUsername(username)
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> {
                     logger.warn("AUDIT: User not found for preferences retrieval: {}", username);
                     return new UserNotFoundException("User not found with username: " + username);
                 });
 
-        // For now, return default preferences
-        // TODO: Implement user preferences table and logic
+        UserPreferences preferences = userPreferencesRepository.findByUser(user)
+                .orElseGet(() -> {
+                    // Create default preferences if not found
+                    UserPreferences defaultPrefs = new UserPreferences();
+                    defaultPrefs.setUser(user);
+                    defaultPrefs.setTemperatureUnit("celsius");
+                    defaultPrefs.setNotificationEnabled(true);
+                    defaultPrefs.setEmailNotifications(true);
+                    defaultPrefs.setPushNotifications(true);
+                    defaultPrefs.setSmsNotifications(false);
+                    defaultPrefs.setTimezone("UTC");
+                    defaultPrefs.setDefaultLocationId(null);
+                    userPreferencesRepository.save(defaultPrefs);
+                    return defaultPrefs;
+                });
+
         return new UserPreferencesResponseDto(
-                "celsius",
-                true,
-                true,
-                true,
-                false,
-                "UTC",
-                null);
+                preferences.getTemperatureUnit(),
+                preferences.getNotificationEnabled(),
+                preferences.getEmailNotifications(),
+                preferences.getPushNotifications(),
+                preferences.getSmsNotifications(),
+                preferences.getTimezone(),
+                preferences.getDefaultLocationId());
     }
 
     /**
@@ -127,25 +147,38 @@ public class UserService {
     public UserPreferencesResponseDto updateUserPreferences(String username, UserPreferencesDto preferencesDto) {
         logger.info("AUDIT: Updating user preferences for username: {}", username);
 
-        // Verify user exists
-        userRepository.findByUsername(username)
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> {
                     logger.warn("AUDIT: User not found for preferences update: {}", username);
                     return new UserNotFoundException("User not found with username: " + username);
                 });
 
-        // TODO: Implement user preferences table and update logic
-        // For now, return the updated preferences as provided
+        UserPreferences preferences = userPreferencesRepository.findByUser(user)
+                .orElseGet(() -> {
+                    UserPreferences newPrefs = new UserPreferences();
+                    newPrefs.setUser(user);
+                    return newPrefs;
+                });
+
+        preferences.setTemperatureUnit(preferencesDto.getTemperatureUnit());
+        preferences.setNotificationEnabled(preferencesDto.getNotificationEnabled());
+        preferences.setEmailNotifications(preferencesDto.getEmailNotifications());
+        preferences.setPushNotifications(preferencesDto.getPushNotifications());
+        preferences.setSmsNotifications(preferencesDto.getSmsNotifications());
+        preferences.setTimezone(preferencesDto.getTimezone());
+        preferences.setDefaultLocationId(preferencesDto.getDefaultLocationId());
+        userPreferencesRepository.save(preferences);
+
         logger.info("AUDIT: User preferences updated successfully for username: {}", username);
 
         return new UserPreferencesResponseDto(
-                preferencesDto.getTemperatureUnit(),
-                preferencesDto.getNotificationEnabled(),
-                preferencesDto.getEmailNotifications(),
-                preferencesDto.getPushNotifications(),
-                preferencesDto.getSmsNotifications(),
-                preferencesDto.getTimezone(),
-                preferencesDto.getDefaultLocationId());
+                preferences.getTemperatureUnit(),
+                preferences.getNotificationEnabled(),
+                preferences.getEmailNotifications(),
+                preferences.getPushNotifications(),
+                preferences.getSmsNotifications(),
+                preferences.getTimezone(),
+                preferences.getDefaultLocationId());
     }
 
     /**
