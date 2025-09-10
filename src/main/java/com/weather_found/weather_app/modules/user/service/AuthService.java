@@ -1,5 +1,11 @@
 package com.weather_found.weather_app.modules.user.service;
 
+import java.util.Set;
+import java.util.HashSet;
+import jakarta.mail.internet.MimeMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -41,10 +47,12 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
     private final JwtUtils jwtUtils;
+    private final JavaMailSender mailSender;
 
     public AuthService(UserValidation userValidation, UserRepository userRepository,
             RoleRepository roleRepository, UserRoleRepository userRoleRepository,
-            PasswordEncoder passwordEncoder, UserMapper userMapper, JwtUtils jwtUtils) {
+            PasswordEncoder passwordEncoder, UserMapper userMapper, JwtUtils jwtUtils,
+            JavaMailSender mailSender) {
         this.userValidation = userValidation;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
@@ -52,6 +60,7 @@ public class AuthService {
         this.passwordEncoder = passwordEncoder;
         this.userMapper = userMapper;
         this.jwtUtils = jwtUtils;
+        this.mailSender = mailSender;
     }
 
     /**
@@ -201,6 +210,9 @@ public class AuthService {
     /**
      * Logout user and invalidate token
      */
+    // Simple in-memory blacklist. For production, use Redis or DB.
+    private Set<String> tokenBlacklist = new HashSet<>();
+
     public void logoutUser(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
@@ -208,8 +220,9 @@ public class AuthService {
             String username = jwtUtils.getUsernameFromJwtToken(jwt);
             logger.info("AUDIT: User logout - username: {}", username);
 
-            // TODO: Implement token blacklist for complete logout
-            // For now, just log the logout event
+            // Blacklist the token
+            tokenBlacklist.add(jwt);
+            logger.info("AUDIT: Token blacklisted for logout: {}", jwt);
         }
     }
 
@@ -262,14 +275,32 @@ public class AuthService {
                         return new InvalidUserException("User not found with email: " + normalizedEmail);
                     });
 
-            // TODO: Implement actual email sending with reset token
-            // For now, just log the reset request
-            logger.info("AUDIT: Password reset email would be sent to: {} for user: {}",
-                       normalizedEmail, user.getUsername());
+            // Send password reset email with token
+            String resetToken = jwtUtils.generateJwtToken(user.getUsername());
+            String resetLink = "https://your-app-url/reset-password?token=" + resetToken;
+            String subject = "Password Reset Request";
+            String body = "Hello " + user.getUsername() + ",\n\n" +
+                    "To reset your password, click the link below:\n" + resetLink +
+                    "\n\nIf you did not request a password reset, please ignore this email.";
+
+            try {
+                MimeMessage message = mailSender.createMimeMessage();
+                MimeMessageHelper helper = new MimeMessageHelper(message, true);
+                helper.setTo(normalizedEmail);
+                helper.setSubject(subject);
+                helper.setText(body);
+                mailSender.send(message);
+                logger.info("AUDIT: Password reset email sent to: {} for user: {}", normalizedEmail,
+                        user.getUsername());
+            } catch (Exception e) {
+                logger.error("AUDIT: Failed to send password reset email to: {} - error: {}", normalizedEmail,
+                        e.getMessage());
+                throw new RuntimeException("Failed to send password reset email");
+            }
 
         } catch (DataAccessException e) {
             logger.error("AUDIT: Database error during password reset request - email: {}, error: {}",
-                        resetRequest.getEmail(), e.getMessage());
+                    resetRequest.getEmail(), e.getMessage());
             throw new DatabaseOperationException("Database operation failed during password reset", e);
         }
     }
@@ -282,27 +313,32 @@ public class AuthService {
         logger.info("AUDIT: Password reset confirmation attempt");
 
         try {
-            // TODO: Implement proper token validation and user lookup
-            // For now, this is a placeholder implementation
-
+            // Validate token and lookup user
             String token = resetConfirm.getToken();
             String newPassword = resetConfirm.getNewPassword();
 
-            // Validate new password
             if (newPassword == null || newPassword.trim().length() < 8) {
                 throw new InvalidUserException("Password must be at least 8 characters long");
             }
 
-            // TODO: Validate reset token and get user
-            // For now, just log the reset attempt
-            logger.info("AUDIT: Password reset confirmation - token validation needed");
+            // Validate reset token
+            if (!jwtUtils.validateJwtToken(token)) {
+                logger.warn("AUDIT: Password reset failed - invalid token");
+                throw new InvalidUserException("Invalid or expired reset token");
+            }
 
-            // TODO: Update user password
-            // String encodedPassword = passwordEncoder.encode(newPassword);
-            // user.setPassword(encodedPassword);
-            // userRepository.save(user);
+            String username = jwtUtils.getUsernameFromJwtToken(token);
+            User user = userRepository.findByUsername(username)
+                    .orElseThrow(() -> {
+                        logger.warn("AUDIT: Password reset failed - user not found: {}", username);
+                        return new InvalidUserException("User not found");
+                    });
 
-            logger.info("AUDIT: Password reset would be completed for token: {}", token);
+            // Update user password
+            String encodedPassword = passwordEncoder.encode(newPassword);
+            user.setPassword(encodedPassword);
+            userRepository.save(user);
+            logger.info("AUDIT: Password reset completed for user: {}", username);
 
         } catch (Exception e) {
             logger.error("AUDIT: Password reset failed - error: {}", e.getMessage());
