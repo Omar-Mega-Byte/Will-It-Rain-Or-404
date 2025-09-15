@@ -22,7 +22,6 @@ According to the NASA Space Apps Challenge 2025, participants must develop an ap
    - User registration and secure login system
    - Personal profile with preferences and settings
    - Location-based user preferences
-   - Notification preferences management
 
 2. **Event Planning & Management**
    - Create, edit, and delete outdoor events
@@ -48,13 +47,7 @@ According to the NASA Space Apps Challenge 2025, participants must develop an ap
    - Activity recommendations based on weather conditions
    - Risk assessment for outdoor activities
 
-6. **Notification System**
-   - Real-time weather alerts
-   - Event-specific notifications
-   - Multi-channel delivery (email, push, SMS)
-   - Customizable alert thresholds
-
-7. **Analytics & Reporting**
+6. **Analytics & Reporting**
    - Prediction accuracy tracking
    - User activity analytics
    - Weather pattern analysis
@@ -90,7 +83,6 @@ According to the NASA Space Apps Challenge 2025, participants must develop an ap
    - NASA Earth Observation APIs
    - Multiple weather data providers
    - Geocoding and mapping services
-   - Third-party notification services
 
 #### Non-Functional Requirements
 1. **Performance**
@@ -134,10 +126,9 @@ According to the NASA Space Apps Challenge 2025, participants must develop an ap
 ### Key Features & Benefits
 1. **Personalized Forecasting**: Tailored predictions based on user preferences and event types
 2. **Multi-Source Data**: Combines NASA data with commercial weather services for accuracy
-3. **Smart Notifications**: Proactive alerts about weather changes affecting planned events
-4. **Risk Assessment**: Quantified risk levels for different types of outdoor activities
-5. **Alternative Suggestions**: Recommends optimal dates/times for weather-sensitive events
-6. **Historical Analysis**: Provides insights based on historical weather patterns
+3. **Risk Assessment**: Quantified risk levels for different types of outdoor activities
+4. **Alternative Suggestions**: Recommends optimal dates/times for weather-sensitive events
+5. **Historical Analysis**: Provides insights based on historical weather patterns
 
 ---
 
@@ -147,7 +138,7 @@ According to the NASA Space Apps Challenge 2025, participants must develop an ap
 - **Machine Learning**: Python with TensorFlow/Scikit-learn
 - **Database**: MySQL 8.0+
 - **Caching**: Redis
-- **Message Queue**: RabbitMQ
+- **Message Queue**: RabbitMQ for ML predictions
 - **External APIs**: NASA Earth Observation Data, OpenWeatherMap, AccuWeather
 
 ---
@@ -224,15 +215,6 @@ src/main/java/com/weather_found/weather_app/
         │   ├── mapper/
         │   ├── validation/
         │   └── exception/
-        ├── notification/
-        │   ├── controller/
-        │   ├── service/
-        │   ├── repository/
-        │   ├── model/
-        │   ├── dto/
-        │   ├── mapper/
-        │   ├── validation/
-        │   └── exception/
         └── analytics/
             ├── controller/
             ├── service/
@@ -261,7 +243,7 @@ src/test/
 
 #### 2. User Module
 - User registration, authentication, and profile management
-- Password reset and email verification
+- Password reset functionality
 - User preferences and settings management
 - User activity tracking and audit logging
 - Role-based access control implementation
@@ -270,7 +252,6 @@ src/test/
 - Weather data aggregation from multiple external sources
 - Real-time weather updates and synchronization
 - Historical weather data collection and storage
-- Weather alerts and warnings management
 - Data quality validation and normalization
 
 #### 4. Location Module
@@ -294,17 +275,10 @@ src/test/
 - Prediction history and accuracy tracking
 - Custom prediction models for different event types
 
-#### 7. Notification Module
-- Multi-channel notification delivery (email, push, SMS)
-- Notification scheduling and queue management
-- User notification preferences and opt-out handling
-- Template-based notification content management
-- Delivery status tracking and retry mechanisms
-
-#### 8. Analytics Module
+#### 7. Analytics Module
 - User behavior analytics and insights
 - Prediction accuracy metrics and model performance
-- System performance monitoring and alerting
+- System performance monitoring
 - Business intelligence and reporting features
 - Data visualization support for dashboards
 
@@ -359,14 +333,12 @@ Frontend/
 │   ├── hooks/
 │   │   ├── useAuth.js
 │   │   ├── useWeather.js
-│   │   ├── useLocation.js
-│   │   └── useNotification.js
+│   │   └── useLocation.js
 │   ├── services/
 │   │   ├── api.js
 │   │   ├── auth.js
 │   │   ├── weather.js
-│   │   ├── events.js
-│   │   └── notifications.js
+│   │   └── events.js
 │   ├── store/
 │   │   ├── store.js
 │   │   ├── slices/
@@ -477,7 +449,6 @@ ML/
 | phone | VARCHAR(20) | | User's phone number |
 | timezone | VARCHAR(50) | DEFAULT 'UTC' | User's timezone |
 | is_active | BOOLEAN | DEFAULT TRUE | Account status |
-| email_verified | BOOLEAN | DEFAULT FALSE | Email verification status |
 | created_at | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Account creation time |
 | updated_at | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | Last update time |
 
@@ -487,10 +458,6 @@ ML/
 | id | BIGINT | PRIMARY KEY, AUTO_INCREMENT | Unique preference identifier |
 | user_id | BIGINT | FOREIGN KEY (users.id), ON DELETE CASCADE | Reference to user |
 | temperature_unit | VARCHAR(10) | DEFAULT 'celsius' | Temperature unit preference |
-| notification_enabled | BOOLEAN | DEFAULT TRUE | General notification setting |
-| email_notifications | BOOLEAN | DEFAULT TRUE | Email notification preference |
-| push_notifications | BOOLEAN | DEFAULT TRUE | Push notification preference |
-| sms_notifications | BOOLEAN | DEFAULT FALSE | SMS notification preference |
 | default_location_id | BIGINT | | Default location reference |
 | created_at | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Creation time |
 | updated_at | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | Update time |
@@ -575,21 +542,6 @@ ML/
 | prediction_accuracy | DECIMAL(5,2) | | Actual accuracy after event |
 | created_at | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Creation time |
 
-### Notifications Table
-| Column | Type | Constraints | Description |
-|--------|------|-------------|-------------|
-| id | BIGINT | PRIMARY KEY, AUTO_INCREMENT | Unique notification identifier |
-| user_id | BIGINT | FOREIGN KEY (users.id), ON DELETE CASCADE | Target user |
-| event_id | BIGINT | FOREIGN KEY (events.id), ON DELETE CASCADE | Related event |
-| type | VARCHAR(50) | NOT NULL | Notification type |
-| title | VARCHAR(255) | NOT NULL | Notification title |
-| message | TEXT | NOT NULL | Notification message |
-| is_read | BOOLEAN | DEFAULT FALSE | Read status |
-| sent_at | TIMESTAMP | | When notification was sent |
-| scheduled_for | TIMESTAMP | | Scheduled send time |
-| delivery_method | VARCHAR(20) | | Delivery method |
-| status | VARCHAR(20) | DEFAULT 'pending' | Notification status |
-| created_at | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Creation time |
 
 ### User Activity Logs Table
 | Column | Type | Constraints | Description |
@@ -623,7 +575,6 @@ ML/
 ```
 Users (1) ←→ (1) User_Preferences
 Users (1) ←→ (M) Events
-Users (1) ←→ (M) Notifications
 Users (1) ←→ (M) User_Activity_Logs
 Users (1) ←→ (M) API_Usage_Analytics
 Users (M) ←→ (M) Locations [through User_Favorite_Locations]
@@ -633,7 +584,6 @@ Locations (1) ←→ (M) Weather_Data
 Locations (1) ←→ (M) Weather_Predictions
 
 Events (1) ←→ (M) Weather_Predictions
-Events (1) ←→ (M) Notifications
 ```
 
 ### Database Indexes for Performance
@@ -690,12 +640,6 @@ Events (1) ←→ (M) Notifications
 - `GET /api/weather/historical` - Get historical weather data
 - `POST /api/weather/prediction` - Get weather prediction for event
 
-### Notification Module
-- `GET /api/notifications` - Get user notifications
-- `PUT /api/notifications/{id}/read` - Mark notification as read
-- `POST /api/notifications/settings` - Update notification settings
-- `DELETE /api/notifications/{id}` - Delete notification
-
 ### Analytics Module
 - `GET /api/analytics/user` - Get user analytics
 - `GET /api/analytics/predictions` - Get prediction accuracy metrics
@@ -739,13 +683,13 @@ Events (1) ←→ (M) Notifications
 - **Database**: MySQL with master-slave replication
 - **ML Service**: Python API deployed on separate server or cloud instance
 - **Caching**: Redis cluster for session and data caching
-- **Message Queue**: RabbitMQ for asynchronous processing
+- **Message Queue**: RabbitMQ for asynchronous ML processing
 
 ### Monitoring & Observability
 - Application metrics collection with Micrometer/Prometheus
 - Centralized logging with ELK stack (Elasticsearch, Logstash, Kibana)
 - Health checks and uptime monitoring
-- Performance monitoring and alerting
+- Performance monitoring
 - Error tracking with Sentry
 
 ---
@@ -766,9 +710,6 @@ Events (1) ←→ (M) Notifications
 
 ### Third-party Services
 - Google Maps API for geocoding and mapping
-- Firebase Cloud Messaging for push notifications
-- SendGrid for transactional email delivery
-- Twilio for SMS notifications
 - Stripe for payment processing (future premium features)
 
 ---
