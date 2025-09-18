@@ -1,0 +1,40 @@
+package com.weather_found.weather_app.modules.location;
+
+import com.weather_found.weather_app.modules.location.controller.LocationController;
+import com.weather_found.weather_app.modules.location.service.LocationService;
+// ...existing code...
+import com.weather_found.weather_app.modules.location.dto.response.LocationSummaryResponse;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.http.ResponseEntity;
+import java.util.Collections;
+import java.util.List;
+import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.*;
+
+class LocationControllerTest {
+    @Mock
+    private LocationService locationService;
+
+    @InjectMocks
+    private LocationController locationController;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+    }
+
+    @Test
+    void testGetAllLocations() {
+        LocationSummaryResponse summary = new LocationSummaryResponse();
+        summary.setId(1L);
+        when(locationService.getAllLocations()).thenReturn(Collections.singletonList(summary));
+        ResponseEntity<List<LocationSummaryResponse>> result = locationController.getAllLocations();
+        assertNotNull(result.getBody());
+        assertEquals(1, result.getBody().size());
+        assertEquals(1L, result.getBody().get(0).getId());
+    }
+}
