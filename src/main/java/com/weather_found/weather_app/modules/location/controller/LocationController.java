@@ -1,286 +1,157 @@
 package com.weather_found.weather_app.modules.location.controller;
 
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
-
+import com.weather_found.weather_app.modules.location.dto.request.CreateLocationRequest;
+import com.weather_found.weather_app.modules.location.dto.request.UpdateLocationRequest;
+import com.weather_found.weather_app.modules.location.dto.response.LocationResponse;
+import com.weather_found.weather_app.modules.location.dto.response.LocationSummaryResponse;
+import com.weather_found.weather_app.modules.location.service.LocationService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotBlank;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
 
 /**
- * REST controller for location management
+ * REST Controller for Location Management
  */
 @RestController
-@RequestMapping("/api/locations")
-@CrossOrigin(origins = "*", maxAge = 3600)
-@Tag(name = "Location Management", description = "Geographic location management endpoints")
+@RequestMapping("/api/v1/locations")
+@RequiredArgsConstructor
+@Validated
+@Slf4j
+@Tag(name = "Location Management", description = "Endpoints for managing geographic locations")
 @SecurityRequirement(name = "bearerAuth")
 public class LocationController {
 
+    private final LocationService locationService;
+
     /**
-     * Search for locations
+     * Get all locations
      */
-    @GetMapping("/search")
+    @GetMapping
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    @Operation(summary = "Search locations", description = "Search for locations by name or coordinates")
-    public ResponseEntity<String> searchLocations(@RequestParam String query, Authentication authentication) {
-        String searchResults = """
-                {
-                    "query": "%s",
-                    "totalResults": 15,
-                    "executionTime": "0.2 seconds",
-                    "locations": [
-                        {
-                            "id": 1,
-                            "name": "New York City",
-                            "country": "United States",
-                            "state": "New York",
-                            "coordinates": {"lat": 40.7128, "lng": -74.0060},
-                            "population": 8336817,
-                            "timezone": "America/New_York",
-                            "relevanceScore": 0.95
-                        },
-                        {
-                            "id": 2,
-                            "name": "Newark",
-                            "country": "United States",
-                            "state": "New Jersey",
-                            "coordinates": {"lat": 40.7357, "lng": -74.1724},
-                            "population": 311549,
-                            "timezone": "America/New_York",
-                            "relevanceScore": 0.78
-                        },
-                        {
-                            "id": 3,
-                            "name": "New Orleans",
-                            "country": "United States",
-                            "state": "Louisiana",
-                            "coordinates": {"lat": 29.9511, "lng": -90.0715},
-                            "population": 390144,
-                            "timezone": "America/Chicago",
-                            "relevanceScore": 0.72
-                        }
-                    ],
-                    "suggestions": ["New York", "Newark", "New Delhi", "Newcastle"]
-                }
-                """.formatted(query);
-        return ResponseEntity.ok(searchResults);
+    @Operation(summary = "Get all locations", description = "Retrieve all locations in the system")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved locations"),
+            @ApiResponse(responseCode = "403", description = "Access denied")
+    })
+    public ResponseEntity<List<LocationSummaryResponse>> getAllLocations() {
+        log.info("Request to get all locations");
+        List<LocationSummaryResponse> locations = locationService.getAllLocations();
+        return ResponseEntity.ok(locations);
     }
 
     /**
-     * Get location details
+     * Get location by ID
      */
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    @Operation(summary = "Get location details", description = "Get detailed information about a specific location")
-    public ResponseEntity<String> getLocationDetails(@PathVariable Long id, Authentication authentication) {
-        String locationDetails = """
-                {
-                    "id": %d,
-                    "name": "New York City",
-                    "fullName": "New York City, New York, United States",
-                    "country": "United States",
-                    "state": "New York",
-                    "county": "New York County",
-                    "coordinates": {
-                        "latitude": 40.7128,
-                        "longitude": -74.0060,
-                        "elevation": "10 meters"
-                    },
-                    "demographics": {
-                        "population": 8336817,
-                        "area": "783.8 km²",
-                        "density": "10,630/km²"
-                    },
-                    "timezone": {
-                        "name": "America/New_York",
-                        "offset": "UTC-5",
-                        "currentTime": "%s"
-                    },
-                    "climate": {
-                        "type": "Humid subtropical",
-                        "averageTemperature": {
-                            "summer": "25°C",
-                            "winter": "4°C"
-                        },
-                        "averageRainfall": "1,268 mm/year"
-                    },
-                    "landmarks": [
-                        "Statue of Liberty",
-                        "Empire State Building",
-                        "Central Park",
-                        "Times Square"
-                    ],
-                    "nearbyLocations": [
-                        {"name": "Brooklyn", "distance": "5 km"},
-                        {"name": "Jersey City", "distance": "8 km"},
-                        {"name": "Newark", "distance": "15 km"}
-                    ]
-                }
-                """.formatted(id, java.time.Instant.now().toString());
-        return ResponseEntity.ok(locationDetails);
+    @Operation(summary = "Get location by ID", description = "Retrieve a specific location by its ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved location"),
+            @ApiResponse(responseCode = "404", description = "Location not found"),
+            @ApiResponse(responseCode = "403", description = "Access denied")
+    })
+    public ResponseEntity<LocationResponse> getLocationById(
+            @Parameter(description = "Location ID", required = true) @PathVariable Long id) {
+        log.info("Request to get location with ID: {}", id);
+        LocationResponse location = locationService.getLocationById(id);
+        return ResponseEntity.ok(location);
     }
 
     /**
-     * Get user's favorite locations
+     * Search locations
      */
-    @GetMapping("/favorites")
+    @GetMapping("/search")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    @Operation(summary = "Get favorite locations", description = "Get user's favorite locations")
-    public ResponseEntity<String> getFavoriteLocations(Authentication authentication) {
-        String username = authentication.getName();
-        String favoriteLocations = """
-                {
-                    "user": "%s",
-                    "totalFavorites": 5,
-                    "maxFavorites": 10,
-                    "favorites": [
-                        {
-                            "id": 1,
-                            "name": "New York City",
-                            "country": "United States",
-                            "coordinates": {"lat": 40.7128, "lng": -74.0060},
-                            "addedAt": "2025-08-15T10:30:00Z",
-                            "lastChecked": "2025-09-05T14:20:00Z",
-                            "currentWeather": "22°C, Sunny"
-                        },
-                        {
-                            "id": 2,
-                            "name": "London",
-                            "country": "United Kingdom",
-                            "coordinates": {"lat": 51.5074, "lng": -0.1278},
-                            "addedAt": "2025-08-20T16:45:00Z",
-                            "lastChecked": "2025-09-05T14:20:00Z",
-                            "currentWeather": "18°C, Cloudy"
-                        },
-                        {
-                            "id": 3,
-                            "name": "Tokyo",
-                            "country": "Japan",
-                            "coordinates": {"lat": 35.6762, "lng": 139.6503},
-                            "addedAt": "2025-09-01T09:15:00Z",
-                            "lastChecked": "2025-09-05T14:20:00Z",
-                            "currentWeather": "26°C, Partly Cloudy"
-                        }
-                    ],
-                    "quickStats": {
-                        "mostChecked": "New York City",
-                        "recentlyAdded": "Tokyo",
-                        "averageCheckFrequency": "3.2 times/day"
-                    }
-                }
-                """.formatted(username);
-        return ResponseEntity.ok(favoriteLocations);
+    @Operation(summary = "Search locations", description = "Search locations by name, city, state, or country")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully searched locations"),
+            @ApiResponse(responseCode = "400", description = "Invalid search parameters"),
+            @ApiResponse(responseCode = "403", description = "Access denied")
+    })
+    public ResponseEntity<List<LocationSummaryResponse>> searchLocations(
+            @Parameter(description = "Search query", required = true) @RequestParam @NotBlank String query) {
+        log.info("Request to search locations with query: {}", query);
+        List<LocationSummaryResponse> locations = locationService.searchLocations(query);
+        return ResponseEntity.ok(locations);
     }
 
     /**
-     * Add location to favorites
-     */
-    @PostMapping("/favorites")
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    @Operation(summary = "Add favorite location", description = "Add a location to user's favorites")
-    public ResponseEntity<String> addFavoriteLocation(@RequestParam Long locationId, Authentication authentication) {
-        String username = authentication.getName();
-        String addResult = """
-                {
-                    "status": "success",
-                    "message": "Location added to favorites successfully",
-                    "user": "%s",
-                    "addedLocation": {
-                        "id": %d,
-                        "name": "Paris",
-                        "country": "France",
-                        "coordinates": {"lat": 48.8566, "lng": 2.3522},
-                        "addedAt": "%s"
-                    },
-                    "totalFavorites": 6,
-                    "maxFavorites": 10,
-                    "remainingSlots": 4,
-                    "notification": {
-                        "enabled": true,
-                        "message": "You will now receive weather updates for Paris"
-                    }
-                }
-                """.formatted(username, locationId, java.time.Instant.now().toString());
-        return ResponseEntity.ok(addResult);
-    }
-
-    /**
-     * Remove location from favorites
-     */
-    @DeleteMapping("/favorites/{id}")
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    @Operation(summary = "Remove favorite location", description = "Remove a location from user's favorites")
-    public ResponseEntity<String> removeFavoriteLocation(@PathVariable Long id, Authentication authentication) {
-        String username = authentication.getName();
-        String removeResult = """
-                {
-                    "status": "success",
-                    "message": "Location removed from favorites successfully",
-                    "user": "%s",
-                    "removedLocation": {
-                        "id": %d,
-                        "name": "Berlin",
-                        "country": "Germany",
-                        "removedAt": "%s"
-                    },
-                    "totalFavorites": 5,
-                    "maxFavorites": 10,
-                    "remainingSlots": 5,
-                    "notification": {
-                        "message": "Weather updates for Berlin have been disabled"
-                    },
-                    "suggestion": "You can re-add this location anytime from search results"
-                }
-                """.formatted(username, id, java.time.Instant.now().toString());
-        return ResponseEntity.ok(removeResult);
-    }
-
-    /**
-     * Create custom location - Admin only
+     * Create a new location
      */
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Create location", description = "Create a new custom location (Admin only)")
-    public ResponseEntity<String> createLocation(@RequestBody String locationData, Authentication authentication) {
-        String createdLocation = """
-                {
-                    "status": "success",
-                    "message": "Custom location created successfully",
-                    "location": {
-                        "id": 501,
-                        "name": "Custom Weather Station",
-                        "type": "custom",
-                        "coordinates": {"lat": 45.5017, "lng": -73.5673},
-                        "address": "Custom Location, Montreal, QC",
-                        "createdBy": "%s",
-                        "createdAt": "%s",
-                        "timezone": "America/Montreal",
-                        "features": [
-                            "Weather monitoring",
-                            "Historical data collection",
-                            "Custom alerts"
-                        ]
-                    },
-                    "services": {
-                        "weatherDataCollection": "enabled",
-                        "publicAccess": "enabled",
-                        "apiAccess": "enabled"
-                    },
-                    "monitoring": {
-                        "sensors": ["temperature", "humidity", "pressure", "wind"],
-                        "dataInterval": "5 minutes",
-                        "qualityCheck": "automated"
-                    },
-                    "nextSteps": [
-                        "Configure weather sensors",
-                        "Set up data collection",
-                        "Enable public visibility"
-                    ]
-                }
-                """.formatted(authentication.getName(), java.time.Instant.now().toString());
-        return ResponseEntity.ok(createdLocation);
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    @Operation(summary = "Create location", description = "Create a new location")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Location created successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid input data"),
+            @ApiResponse(responseCode = "409", description = "Location already exists"),
+            @ApiResponse(responseCode = "403", description = "Access denied")
+    })
+    public ResponseEntity<LocationResponse> createLocation(
+            @Parameter(description = "Location data", required = true) @Valid @RequestBody CreateLocationRequest request) {
+        log.info("Request to create location: {}", request.getName());
+        LocationResponse location = locationService.createLocation(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(location);
+    }
+
+    /**
+     * Update an existing location
+     */
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    @Operation(summary = "Update location", description = "Update an existing location")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Location updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid input data"),
+            @ApiResponse(responseCode = "404", description = "Location not found"),
+            @ApiResponse(responseCode = "409", description = "Location conflict"),
+            @ApiResponse(responseCode = "403", description = "Access denied")
+    })
+    public ResponseEntity<LocationResponse> updateLocation(
+            @Parameter(description = "Location ID", required = true) @PathVariable Long id,
+            @Parameter(description = "Updated location data", required = true) @Valid @RequestBody UpdateLocationRequest request) {
+        log.info("Request to update location with ID: {}", id);
+        LocationResponse location = locationService.updateLocation(id, request);
+        return ResponseEntity.ok(location);
+    }
+
+    /**
+     * Delete a location
+     */
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    @Operation(summary = "Delete location", description = "Delete an existing location")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Location deleted successfully"),
+            @ApiResponse(responseCode = "404", description = "Location not found"),
+            @ApiResponse(responseCode = "403", description = "Access denied")
+    })
+    public ResponseEntity<Void> deleteLocation(
+            @Parameter(description = "Location ID", required = true) @PathVariable Long id) {
+        log.info("Request to delete location with ID: {}", id);
+        locationService.deleteLocation(id);
+        return ResponseEntity.noContent().build();
     }
 }
