@@ -2,7 +2,7 @@ package com.weather_found.weather_app.modules.weather.service;
 
 import com.weather_found.weather_app.modules.weather.model.Location;
 import com.weather_found.weather_app.modules.weather.model.WeatherAlert;
-import com.weather_found.weather_app.modules.weather.repository.LocationRepository;
+import com.weather_found.weather_app.modules.weather.repository.WeatherLocationRepository;
 import com.weather_found.weather_app.modules.weather.repository.WeatherAlertRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
 public class WeatherAlertService {
 
     private final WeatherAlertRepository alertRepository;
-    private final LocationRepository locationRepository;
+    private final WeatherLocationRepository locationRepository;
     private final RedisTemplate<String, Object> redisTemplate;
     private final ExternalWeatherApiService externalWeatherApiService;
 

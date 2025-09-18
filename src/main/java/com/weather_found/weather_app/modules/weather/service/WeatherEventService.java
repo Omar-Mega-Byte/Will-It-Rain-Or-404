@@ -1,129 +1,50 @@
 package com.weather_found.weather_app.modules.weather.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 /**
- * Service for event-specific weather predictions and caching
+ * Service for event-specific weather predictions (no Redis)
  */
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class WeatherEventService {
-
-    private final RedisTemplate<String, Object> redisTemplate;
-    private final ObjectMapper objectMapper;
-    private final WeatherLocationService locationService;
-
-    // Event Weather Cache Keys
-    private static final String EVENT_WEATHER_KEY = "event:weather:";
-    private static final String EVENT_RECOMMENDATIONS_KEY = "event:recommendations:";
-    private static final String EVENT_RISK_ASSESSMENT_KEY = "event:risk:";
-    private static final String WEATHER_SENSITIVITY_KEY = "weather:sensitivity:";
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final WeatherLocationService locationService = new WeatherLocationService();
 
     /**
-     * Get weather prediction for specific event
+     * Get weather prediction for specific event (mocked)
      */
-    @Cacheable(value = "eventWeather", key = "#eventId")
     public Map<String, Object> getEventWeatherPrediction(Long eventId, String location,
             LocalDateTime eventDateTime, String eventType) {
         log.info("Getting weather prediction for event: {} at location: {}", eventId, location);
-
-        String key = EVENT_WEATHER_KEY + eventId;
-        Object cached = redisTemplate.opsForValue().get(key);
-
-        if (cached != null) {
-            try {
-                @SuppressWarnings("unchecked")
-                Map<String, Object> cachedData = (Map<String, Object>) cached;
-                return cachedData;
-            } catch (ClassCastException e) {
-                log.warn("Invalid cached data format for event: {}", eventId);
-            }
-        }
-
-        Map<String, Object> prediction = generateEventWeatherPrediction(eventId, location, eventDateTime, eventType);
-
-        // Cache for 1 hour for events more than 24 hours away, 15 minutes for sooner
-        // events
-        long hoursUntilEvent = java.time.Duration.between(LocalDateTime.now(), eventDateTime).toHours();
-        long ttl = hoursUntilEvent > 24 ? 60 : 15;
-
-        redisTemplate.opsForValue().set(key, prediction, ttl, TimeUnit.MINUTES);
-
-        return prediction;
+        return generateEventWeatherPrediction(eventId, location, eventDateTime, eventType);
     }
 
     /**
-     * Get weather-based recommendations for an event
+     * Get weather-based recommendations for an event (mocked)
      */
-    @Cacheable(value = "eventRecommendations", key = "#eventId + ':' + #eventType")
     public Map<String, Object> getEventRecommendations(Long eventId, String location,
             LocalDateTime eventDateTime, String eventType) {
         log.info("Getting weather recommendations for event: {} type: {}", eventId, eventType);
-
-        String key = EVENT_RECOMMENDATIONS_KEY + eventId + ":" + eventType;
-        Object cached = redisTemplate.opsForValue().get(key);
-
-        if (cached != null) {
-            try {
-                @SuppressWarnings("unchecked")
-                Map<String, Object> cachedData = (Map<String, Object>) cached;
-                return cachedData;
-            } catch (ClassCastException e) {
-                log.warn("Invalid cached recommendations for event: {}", eventId);
-            }
-        }
-
-        Map<String, Object> recommendations = generateEventRecommendations(eventId, location, eventDateTime, eventType);
-
-        // Cache recommendations for 2 hours
-        redisTemplate.opsForValue().set(key, recommendations, 2, TimeUnit.HOURS);
-
-        return recommendations;
+        return generateEventRecommendations(eventId, location, eventDateTime, eventType);
     }
 
     /**
-     * Assess weather risk for event
+     * Assess weather risk for event (mocked)
      */
     public Map<String, Object> assessWeatherRisk(Long eventId, String location,
             LocalDateTime eventDateTime, String eventType, String sensitivity) {
         log.info("Assessing weather risk for event: {} with sensitivity: {}", eventId, sensitivity);
-
-        String key = EVENT_RISK_ASSESSMENT_KEY + eventId + ":" + sensitivity;
-        Object cached = redisTemplate.opsForValue().get(key);
-
-        if (cached != null) {
-            try {
-                @SuppressWarnings("unchecked")
-                Map<String, Object> cachedData = (Map<String, Object>) cached;
-                return cachedData;
-            } catch (ClassCastException e) {
-                log.warn("Invalid cached risk assessment for event: {}", eventId);
-            }
-        }
-
-        Map<String, Object> riskAssessment = generateWeatherRiskAssessment(eventId, location, eventDateTime, eventType,
-                sensitivity);
-
-        // Cache risk assessment for 30 minutes
-        redisTemplate.opsForValue().set(key, riskAssessment, 30, TimeUnit.MINUTES);
-
-        return riskAssessment;
+        return generateWeatherRiskAssessment(eventId, location, eventDateTime, eventType, sensitivity);
     }
 
     /**
-     * Get alternative date/time suggestions for weather-sensitive events
+     * Get alternative date/time suggestions for weather-sensitive events (mocked)
      */
     public Map<String, Object> getAlternativeDateSuggestions(String location, LocalDateTime originalDateTime,
             String eventType, int daysToCheck) {
@@ -132,7 +53,7 @@ public class WeatherEventService {
         Map<String, Object> suggestions = new HashMap<>();
         List<Map<String, Object>> alternatives = new ArrayList<>();
 
-        // Check weather for the next few days
+        // Check weather for the next few days (mocked)
         for (int i = 1; i <= daysToCheck; i++) {
             LocalDateTime alternativeDate = originalDateTime.plusDays(i);
             Map<String, Object> weatherForecast = getWeatherForDateTime(location, alternativeDate);
@@ -160,54 +81,13 @@ public class WeatherEventService {
     }
 
     /**
-     * Get weather sensitivity configuration for event types
+     * Get weather sensitivity configuration for event types (mocked)
      */
     public Map<String, Object> getWeatherSensitivityConfig(String eventType) {
-        String key = WEATHER_SENSITIVITY_KEY + eventType.toLowerCase();
-        Object cached = redisTemplate.opsForValue().get(key);
-
-        if (cached != null) {
-            try {
-                @SuppressWarnings("unchecked")
-                Map<String, Object> cachedData = (Map<String, Object>) cached;
-                return cachedData;
-            } catch (ClassCastException e) {
-                log.warn("Invalid cached sensitivity config for event type: {}", eventType);
-            }
-        }
-
-        Map<String, Object> config = generateSensitivityConfig(eventType);
-
-        // Cache sensitivity config for 24 hours (rarely changes)
-        redisTemplate.opsForValue().set(key, config, 24, TimeUnit.HOURS);
-
-        return config;
+        return generateSensitivityConfig(eventType);
     }
 
-    /**
-     * Track event weather accuracy after the event
-     */
-    public void trackPredictionAccuracy(Long eventId, Map<String, Object> actualWeather) {
-        log.info("Tracking prediction accuracy for event: {}", eventId);
-
-        String predictionKey = EVENT_WEATHER_KEY + eventId;
-        Object predictedWeather = redisTemplate.opsForValue().get(predictionKey);
-
-        if (predictedWeather != null) {
-            Map<String, Object> accuracyData = new HashMap<>();
-            accuracyData.put("eventId", eventId);
-            accuracyData.put("predicted", predictedWeather);
-            accuracyData.put("actual", actualWeather);
-            accuracyData.put("accuracy", calculateAccuracy(predictedWeather, actualWeather));
-            accuracyData.put("trackedAt", LocalDateTime.now());
-
-            // Store accuracy data for analytics
-            String accuracyKey = "analytics:prediction:accuracy:" + eventId;
-            redisTemplate.opsForValue().set(accuracyKey, accuracyData, 30, TimeUnit.DAYS);
-        }
-    }
-
-    // Helper methods for generating mock data
+    // Mock method for event weather prediction
     private Map<String, Object> generateEventWeatherPrediction(Long eventId, String location,
             LocalDateTime eventDateTime, String eventType) {
         Map<String, Object> prediction = new HashMap<>();

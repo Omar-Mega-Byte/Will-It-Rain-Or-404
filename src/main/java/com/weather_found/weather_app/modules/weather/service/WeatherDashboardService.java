@@ -3,7 +3,7 @@ package com.weather_found.weather_app.modules.weather.service;
 import com.weather_found.weather_app.modules.weather.model.Location;
 import com.weather_found.weather_app.modules.weather.model.WeatherAlert;
 import com.weather_found.weather_app.modules.weather.model.WeatherDataEntity;
-import com.weather_found.weather_app.modules.weather.repository.LocationRepository;
+import com.weather_found.weather_app.modules.weather.repository.WeatherLocationRepository;
 import com.weather_found.weather_app.modules.weather.repository.WeatherAlertRepository;
 import com.weather_found.weather_app.modules.weather.repository.WeatherDataRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 public class WeatherDashboardService {
 
     private final WeatherDataRepository weatherDataRepository;
-    private final LocationRepository locationRepository;
+    private final WeatherLocationRepository locationRepository;
     private final WeatherAlertRepository alertRepository;
     private final RedisTemplate<String, Object> redisTemplate;
     private final WeatherLocationService locationService;
@@ -327,21 +327,8 @@ public class WeatherDashboardService {
     }
 
     private List<Map<String, Object>> getPopularLocationsSummary() {
-        try {
-            return locationService.getPopularLocations(10).stream()
-                    .map(obj -> {
-                        Location location = (Location) obj;
-                        Map<String, Object> locationInfo = new HashMap<>();
-                        locationInfo.put("id", location.getId());
-                        locationInfo.put("name", location.getName());
-                        locationInfo.put("country", location.getCountry());
-                        return locationInfo;
-                    })
-                    .collect(Collectors.toList());
-        } catch (Exception e) {
-            log.error("Error getting popular locations summary", e);
-            return Collections.emptyList();
-        }
+        // Redis-based popular locations removed; return empty or static list
+        return new ArrayList<>();
     }
 
     private List<Map<String, Object>> getRecentWeatherData() {

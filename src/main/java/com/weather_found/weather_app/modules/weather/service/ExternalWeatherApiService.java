@@ -4,12 +4,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.weather_found.weather_app.modules.weather.model.Location;
 import com.weather_found.weather_app.modules.weather.model.WeatherDataEntity;
-import com.weather_found.weather_app.modules.weather.repository.LocationRepository;
+import com.weather_found.weather_app.modules.weather.repository.WeatherLocationRepository;
 import com.weather_found.weather_app.modules.weather.repository.WeatherDataRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -31,11 +30,10 @@ public class ExternalWeatherApiService {
 
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
-    private final RedisTemplate<String, Object> redisTemplate;
-    private final LocationRepository locationRepository;
+    private final WeatherLocationRepository locationRepository;
     private final WeatherDataRepository weatherDataRepository;
 
-    @Value("${weather.api.openweathermap.key:demo-key}")
+    @Value("${weather.api.openweathermap.key}")
     private String openWeatherMapApiKey;
 
     @Value("${weather.api.nasa.key:demo-key}")
@@ -49,98 +47,48 @@ public class ExternalWeatherApiService {
     private static final String OPENWEATHERMAP_FORECAST_URL = "https://api.openweathermap.org/data/2.5/forecast";
     private static final String NASA_POWER_URL = "https://power.larc.nasa.gov/api/temporal/daily/point";
 
-    // Cache keys
-    private static final String API_RESPONSE_CACHE = "api:response:";
-    private static final String API_RATE_LIMIT_CACHE = "api:ratelimit:";
-
     /**
-     * Fetch current weather from OpenWeatherMap API
+     * Fetch current weather from OpenWeatherMap API (no Redis, always live)
      */
     public CompletableFuture<Map<String, Object>> fetchCurrentWeatherFromOpenWeatherMap(String locationName) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                String cacheKey = API_RESPONSE_CACHE + "owm:current:" + locationName.toLowerCase();
-                Object cached = redisTemplate.opsForValue().get(cacheKey);
-
-                if (cached != null) {
-                    log.debug("Returning cached OpenWeatherMap data for: {}", locationName);
-                    @SuppressWarnings("unchecked")
-                    Map<String, Object> cachedData = (Map<String, Object>) cached;
-                    return cachedData;
-                }
-
-                if (isRateLimited("openweathermap")) {
-                    log.warn("OpenWeatherMap API rate limited");
-                    return generateMockCurrentWeather(locationName, "OpenWeatherMap");
-                }
-
                 String url = String.format("%s?q=%s&appid=%s&units=metric",
                         OPENWEATHERMAP_CURRENT_URL, locationName, openWeatherMapApiKey);
-
                 ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
-
                 if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                    Map<String, Object> weatherData = parseOpenWeatherMapResponse(response.getBody());
-
-                    // Cache for 5 minutes
-                    redisTemplate.opsForValue().set(cacheKey, weatherData, 5, TimeUnit.MINUTES);
-
-                    trackApiUsage("openweathermap");
+                    Map<String, Object> weatherData = objectMapper.readValue(response.getBody(), Map.class);
                     return weatherData;
                 } else {
-                    log.warn("Failed to fetch from OpenWeatherMap: {}", response.getStatusCode());
-                    return generateMockCurrentWeather(locationName, "OpenWeatherMap");
+                    log.warn("OpenWeatherMap API returned non-2xx for {}: {}", locationName, response.getStatusCode());
+                    return null;
                 }
-
             } catch (Exception e) {
-                log.error("Error fetching weather from OpenWeatherMap for location: {}", locationName, e);
-                return generateMockCurrentWeather(locationName, "OpenWeatherMap");
+                log.error("Error fetching weather from OpenWeatherMap for {}", locationName, e);
+                return null;
             }
         });
     }
 
     /**
-     * Fetch weather forecast from OpenWeatherMap API
+     * Fetch weather forecast from OpenWeatherMap API (no Redis, always live)
      */
     public CompletableFuture<Map<String, Object>> fetchForecastFromOpenWeatherMap(String locationName, int days) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                String cacheKey = API_RESPONSE_CACHE + "owm:forecast:" + locationName.toLowerCase() + ":" + days;
-                Object cached = redisTemplate.opsForValue().get(cacheKey);
-
-                if (cached != null) {
-                    log.debug("Returning cached OpenWeatherMap forecast for: {}", locationName);
-                    @SuppressWarnings("unchecked")
-                    Map<String, Object> cachedData = (Map<String, Object>) cached;
-                    return cachedData;
-                }
-
-                if (isRateLimited("openweathermap")) {
-                    log.warn("OpenWeatherMap API rate limited");
-                    return generateMockForecast(locationName, days, "OpenWeatherMap");
-                }
-
                 String url = String.format("%s?q=%s&appid=%s&units=metric&cnt=%d",
                         OPENWEATHERMAP_FORECAST_URL, locationName, openWeatherMapApiKey, days * 8);
-
                 ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
-
                 if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                     Map<String, Object> forecastData = parseOpenWeatherMapForecastResponse(response.getBody());
-
-                    // Cache for 30 minutes
-                    redisTemplate.opsForValue().set(cacheKey, forecastData, 30, TimeUnit.MINUTES);
-
-                    trackApiUsage("openweathermap");
                     return forecastData;
                 } else {
                     log.warn("Failed to fetch forecast from OpenWeatherMap: {}", response.getStatusCode());
-                    return generateMockForecast(locationName, days, "OpenWeatherMap");
+                    return null;
                 }
-
             } catch (Exception e) {
                 log.error("Error fetching forecast from OpenWeatherMap for location: {}", locationName, e);
-                return generateMockForecast(locationName, days, "OpenWeatherMap");
+                return null;
             }
         });
     }
@@ -152,22 +100,6 @@ public class ExternalWeatherApiService {
             BigDecimal latitude, BigDecimal longitude, String startDate, String endDate) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                String cacheKey = API_RESPONSE_CACHE + "nasa:historical:" + latitude + ":" + longitude + ":" + startDate
-                        + ":" + endDate;
-                Object cached = redisTemplate.opsForValue().get(cacheKey);
-
-                if (cached != null) {
-                    log.debug("Returning cached NASA historical data");
-                    @SuppressWarnings("unchecked")
-                    Map<String, Object> cachedData = (Map<String, Object>) cached;
-                    return cachedData;
-                }
-
-                if (isRateLimited("nasa")) {
-                    log.warn("NASA API rate limited");
-                    return generateMockHistoricalData(latitude, longitude, startDate, endDate, "NASA POWER");
-                }
-
                 String url = String.format(
                         "%s?start=%s&end=%s&latitude=%s&longitude=%s&community=ag&parameters=T2M,PRECTOT,WS2M,RH2M&format=json",
                         NASA_POWER_URL, startDate, endDate, latitude, longitude);
@@ -176,11 +108,6 @@ public class ExternalWeatherApiService {
 
                 if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                     Map<String, Object> historicalData = parseNASAResponse(response.getBody());
-
-                    // Cache for 24 hours (historical data doesn't change)
-                    redisTemplate.opsForValue().set(cacheKey, historicalData, 24, TimeUnit.HOURS);
-
-                    trackApiUsage("nasa");
                     return historicalData;
                 } else {
                     log.warn("Failed to fetch from NASA POWER: {}", response.getStatusCode());
@@ -259,6 +186,11 @@ public class ExternalWeatherApiService {
             JsonNode root = objectMapper.readTree(jsonResponse);
             Map<String, Object> weatherData = new HashMap<>();
 
+            // Extract coordinates
+            JsonNode coord = root.path("coord");
+            if (coord.has("lat")) weatherData.put("lat", coord.get("lat").asDouble());
+            if (coord.has("lon")) weatherData.put("lon", coord.get("lon").asDouble());
+
             weatherData.put("temperature", root.path("main").path("temp").asDouble());
             weatherData.put("humidity", root.path("main").path("humidity").asDouble());
             weatherData.put("pressure", root.path("main").path("pressure").asDouble());
@@ -327,24 +259,6 @@ public class ExternalWeatherApiService {
             log.error("Error parsing NASA response", e);
             return new HashMap<>();
         }
-    }
-
-    private boolean isRateLimited(String apiProvider) {
-        String key = API_RATE_LIMIT_CACHE + apiProvider;
-        String count = (String) redisTemplate.opsForValue().get(key);
-
-        if (count == null) {
-            return false;
-        }
-
-        // Simple rate limiting: max 100 calls per hour per provider
-        return Integer.parseInt(count) >= 100;
-    }
-
-    private void trackApiUsage(String apiProvider) {
-        String key = API_RATE_LIMIT_CACHE + apiProvider;
-        redisTemplate.opsForValue().increment(key);
-        redisTemplate.expire(key, 1, TimeUnit.HOURS);
     }
 
     private Map<String, Object> aggregateResults(List<Map<String, Object>> results, String locationName) {
@@ -474,18 +388,9 @@ public class ExternalWeatherApiService {
     }
 
     /**
-     * Get current weather data for coordinates
+     * Get current weather data for coordinates (no Redis, always live)
      */
     public Map<String, Object> getCurrentWeather(BigDecimal latitude, BigDecimal longitude) {
-        String cacheKey = String.format("current:%s:%s", latitude, longitude);
-
-        @SuppressWarnings("unchecked")
-        Map<String, Object> cachedData = (Map<String, Object>) redisTemplate.opsForValue().get(cacheKey);
-
-        if (cachedData != null) {
-            return cachedData;
-        }
-
         try {
             String url = String.format(
                     "%s?lat=%s&lon=%s&appid=%s&units=metric",
@@ -496,11 +401,6 @@ public class ExternalWeatherApiService {
 
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 Map<String, Object> processedData = processOpenWeatherMapCurrentData(response.getBody());
-
-                // Cache for 5 minutes
-                redisTemplate.opsForValue().set(cacheKey, processedData, 5, TimeUnit.MINUTES);
-
-                incrementApiCallCount("openweathermap");
                 return processedData;
             }
 
@@ -512,18 +412,9 @@ public class ExternalWeatherApiService {
     }
 
     /**
-     * Get weather forecast for coordinates
+     * Get weather forecast for coordinates (no Redis, always live)
      */
     public Map<String, Object> getWeatherForecast(BigDecimal latitude, BigDecimal longitude, int days) {
-        String cacheKey = String.format("forecast:%s:%s:%d", latitude, longitude, days);
-
-        @SuppressWarnings("unchecked")
-        Map<String, Object> cachedData = (Map<String, Object>) redisTemplate.opsForValue().get(cacheKey);
-
-        if (cachedData != null) {
-            return cachedData;
-        }
-
         try {
             String url = String.format(
                     "%s?lat=%s&lon=%s&appid=%s&units=metric&cnt=%d",
@@ -534,11 +425,6 @@ public class ExternalWeatherApiService {
 
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 Map<String, Object> processedData = processOpenWeatherMapForecastData(response.getBody());
-
-                // Cache for 30 minutes
-                redisTemplate.opsForValue().set(cacheKey, processedData, 30, TimeUnit.MINUTES);
-
-                incrementApiCallCount("openweathermap");
                 return processedData;
             }
 
@@ -629,15 +515,6 @@ public class ExternalWeatherApiService {
         return processed;
     }
 
-    private void incrementApiCallCount(String provider) {
-        try {
-            String key = "api:calls:" + provider + ":" + LocalDateTime.now().toLocalDate();
-            redisTemplate.opsForValue().increment(key);
-            redisTemplate.expire(key, 30, TimeUnit.DAYS);
-        } catch (Exception e) {
-            log.debug("Failed to increment API call count for provider: {}", provider);
-        }
-    }
 
     private Map<String, Object> getMockCurrentWeatherData() {
         Map<String, Object> mock = new HashMap<>();
@@ -674,5 +551,37 @@ public class ExternalWeatherApiService {
         mock.put("timestamp", LocalDateTime.now());
 
         return mock;
+    }
+
+    /**
+     * Get real weather data for a city name (simplified method for random weather endpoint)
+     */
+    public Map<String, Object> getRealWeatherDataForCity(String cityName) {
+        try {
+            log.info("Fetching real weather data for city: {}", cityName);
+            CompletableFuture<Map<String, Object>> future = fetchCurrentWeatherFromOpenWeatherMap(cityName);
+            Map<String, Object> rawWeatherData = future.get(apiTimeout, TimeUnit.MILLISECONDS);
+            if (rawWeatherData != null && !rawWeatherData.isEmpty()) {
+                // If the response is already parsed, return as is; otherwise, parse JSON string
+                if (rawWeatherData.containsKey("main") && rawWeatherData.containsKey("weather")) {
+                    // This is a raw OpenWeatherMap response, so convert it to JSON and parse
+                    String jsonString = objectMapper.writeValueAsString(rawWeatherData);
+                    Map<String, Object> parsed = parseOpenWeatherMapResponse(jsonString);
+                    log.info("Successfully parsed real weather data for: {}", cityName);
+                    return parsed;
+                } else {
+                    // Already parsed/flat map
+                    log.info("Successfully fetched real weather data for: {}", cityName);
+                    return rawWeatherData;
+                }
+            } else {
+                log.warn("No weather data returned for: {}", cityName);
+                return null;
+            }
+
+        } catch (Exception e) {
+            log.error("Error fetching real weather data for city: {}", cityName, e);
+            return null;
+        }
     }
 }

@@ -9,6 +9,14 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import com.weather_found.weather_app.modules.weather.service.ExternalWeatherApiService;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.concurrent.CompletableFuture;
+
 /**
  * REST controller for weather data management
  */
@@ -17,7 +25,21 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @CrossOrigin(origins = "*", maxAge = 3600)
 @Tag(name = "Weather Management", description = "Weather data and forecast endpoints")
 @SecurityRequirement(name = "bearerAuth")
+@RequiredArgsConstructor
+@Slf4j
 public class WeatherController {
+
+    private final ExternalWeatherApiService externalWeatherApiService;
+
+    // List of random cities for the random weather endpoint
+    private static final List<String> RANDOM_CITIES = List.of(
+            "New York, NY", "London, UK", "Tokyo, Japan", "Paris, France", "Sydney, Australia",
+            "Toronto, Canada", "Berlin, Germany", "Mumbai, India", "São Paulo, Brazil", "Cairo, Egypt",
+            "Bangkok, Thailand", "Moscow, Russia", "Cape Town, South Africa", "Mexico City, Mexico",
+            "Singapore", "Istanbul, Turkey", "Buenos Aires, Argentina", "Lagos, Nigeria",
+            "Seoul, South Korea", "Stockholm, Sweden");
+
+    private static final Random random = new Random();
 
     /**
      * Get current weather for a location
@@ -69,6 +91,173 @@ public class WeatherController {
                 }
                 """.formatted(location, java.time.Instant.now().toString(), java.time.Instant.now().toString());
         return ResponseEntity.ok(currentWeather);
+    }
+
+    /**
+     * Get random weather for a random location (public endpoint for home page)
+     */
+    @GetMapping("/random")
+    @Operation(summary = "Get random weather", description = "Get current weather data for a random location (no authentication required)")
+    public ResponseEntity<String> getRandomWeather() {
+        // Select a random city
+        String randomCity = RANDOM_CITIES.get(random.nextInt(RANDOM_CITIES.size()));
+
+        try {
+            log.info("Attempting to fetch real weather data for: {}", randomCity);
+
+            // Try to get real weather data directly from OpenWeather API
+            Map<String, Object> realWeatherData = externalWeatherApiService.getRealWeatherDataForCity(randomCity);
+
+            if (realWeatherData != null) {
+                // Convert real weather data to JSON format
+                String weatherJson = convertRealWeatherDataToJson(randomCity, realWeatherData);
+                log.info("Successfully fetched real weather data for: {}", randomCity);
+                return ResponseEntity.ok(weatherJson);
+            }
+
+            log.warn("Real weather data not available for: {}", randomCity);
+
+        } catch (Exception e) {
+            log.error("Error fetching real weather data for: {}", randomCity, e);
+        }
+
+        // If real weather data is not available, do not return random/fallback data
+        return ResponseEntity.status(503).body("{\"error\":\"Weather data unavailable. Please try again later.\"}");
+    }
+
+    /**
+     * Helper method to convert real OpenWeather data to frontend JSON format
+     */
+    private String convertRealWeatherDataToJson(String cityName, Map<String, Object> weatherData) {
+        try {
+            String[] cityParts = cityName.split(", ");
+            String name = cityParts[0];
+            String country = cityParts.length > 1 ? cityParts[1] : "Unknown";
+
+            // Use real coordinates from API if available, otherwise fallback to city mapping
+            double lat = 0.0;
+            double lon = 0.0;
+            if (weatherData.get("lat") instanceof Number) lat = ((Number) weatherData.get("lat")).doubleValue();
+            if (weatherData.get("lon") instanceof Number) lon = ((Number) weatherData.get("lon")).doubleValue();
+            if (lat == 0.0 && lon == 0.0) {
+                lat = getCityLatitude(name);
+                lon = getCityLongitude(name);
+            }
+
+            double temperature = weatherData.get("temperature") instanceof Number ?
+                ((Number) weatherData.get("temperature")).doubleValue() : 22.0;
+            double humidity = weatherData.get("humidity") instanceof Number ?
+                ((Number) weatherData.get("humidity")).doubleValue() : 65.0;
+            double pressure = weatherData.get("pressure") instanceof Number ?
+                ((Number) weatherData.get("pressure")).doubleValue() : 1013.0;
+            double windSpeed = weatherData.get("windSpeed") instanceof Number ?
+                ((Number) weatherData.get("windSpeed")).doubleValue() : 12.0;
+            double visibility = weatherData.get("visibility") instanceof Number ?
+                ((Number) weatherData.get("visibility")).doubleValue() : 10.0;
+            String condition = weatherData.get("weatherCondition") != null ?
+                weatherData.get("weatherCondition").toString() : "Clear";
+            String description = weatherData.get("description") != null ?
+                weatherData.get("description").toString() : condition;
+            int windDirection = weatherData.get("windDirection") instanceof Number ?
+                ((Number) weatherData.get("windDirection")).intValue() : 0;
+            int cloudCover = weatherData.get("cloudCover") instanceof Number ?
+                ((Number) weatherData.get("cloudCover")).intValue() : 50;
+
+            return String.format("""
+                {
+                    "location": {
+                        "name": "%s",
+                        "country": "%s",
+                        "coordinates": {"lat": %.6f, "lng": %.6f},
+                        "timezone": "Local Time",
+                        "localTime": "%s"
+                    },
+                    "current": {
+                        "temperature": %.1f,
+                        "feelsLike": %.1f,
+                        "condition": "%s",
+                        "description": "%s",
+                        "humidity": "%.0f%%",
+                        "pressure": "%.0f hPa",
+                        "visibility": "%.1f km",
+                        "windSpeed": %.1f,
+                        "windDirection": "%d°",
+                        "cloudCover": "%d%%"
+                    },
+                    "lastUpdated": "%s",
+                    "dataSource": "OpenWeatherMap (Real Data)",
+                    "accuracy": "High"
+                }
+                """,
+                name, country,
+                lat, lon,
+                java.time.Instant.now().toString(),
+                temperature, temperature + 1.5, condition, description, humidity,
+                pressure, visibility, windSpeed, windDirection, cloudCover,
+                java.time.Instant.now().toString()
+            );
+        } catch (Exception e) {
+            log.error("Error converting real weather data to JSON: {}", e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Get approximate latitude for known cities
+     */
+    private double getCityLatitude(String cityName) {
+        return switch (cityName) {
+            case "New York" -> 40.7128;
+            case "London" -> 51.5074;
+            case "Tokyo" -> 35.6762;
+            case "Paris" -> 48.8566;
+            case "Sydney" -> -33.8688;
+            case "Toronto" -> 43.6532;
+            case "Berlin" -> 52.5200;
+            case "Mumbai" -> 19.0760;
+            case "São Paulo" -> -23.5505;
+            case "Cairo" -> 30.0444;
+            case "Bangkok" -> 13.7563;
+            case "Moscow" -> 55.7558;
+            case "Cape Town" -> -33.9249;
+            case "Mexico City" -> 19.4326;
+            case "Singapore" -> 1.3521;
+            case "Istanbul" -> 41.0082;
+            case "Buenos Aires" -> -34.6037;
+            case "Lagos" -> 6.5244;
+            case "Seoul" -> 37.5665;
+            case "Stockholm" -> 59.3293;
+            default -> 0.0;
+        };
+    }
+
+    /**
+     * Get approximate longitude for known cities
+     */
+    private double getCityLongitude(String cityName) {
+        return switch (cityName) {
+            case "New York" -> -74.0060;
+            case "London" -> -0.1278;
+            case "Tokyo" -> 139.6503;
+            case "Paris" -> 2.3522;
+            case "Sydney" -> 151.2093;
+            case "Toronto" -> -79.3832;
+            case "Berlin" -> 13.4050;
+            case "Mumbai" -> 72.8777;
+            case "São Paulo" -> -46.6333;
+            case "Cairo" -> 31.2357;
+            case "Bangkok" -> 100.5018;
+            case "Moscow" -> 37.6176;
+            case "Cape Town" -> 18.4241;
+            case "Mexico City" -> -99.1332;
+            case "Singapore" -> 103.8198;
+            case "Istanbul" -> 28.9784;
+            case "Buenos Aires" -> -58.3816;
+            case "Lagos" -> 3.3792;
+            case "Seoul" -> 126.9780;
+            case "Stockholm" -> 18.0686;
+            default -> 0.0;
+        };
     }
 
     /**

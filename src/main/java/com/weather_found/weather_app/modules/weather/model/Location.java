@@ -13,10 +13,10 @@ import java.time.LocalDateTime;
 /**
  * Location entity for weather data
  */
-@Entity
-@Table(name = "locations", indexes = {
-        @Index(name = "idx_location_coords", columnList = "latitude, longitude"),
-        @Index(name = "idx_location_name", columnList = "name")
+@Entity(name = "WeatherLocation")
+@Table(name = "weather_locations", indexes = {
+        @Index(name = "idx_weather_location_coords", columnList = "latitude, longitude"),
+        @Index(name = "idx_weather_location_name", columnList = "name")
 })
 @Data
 @NoArgsConstructor
