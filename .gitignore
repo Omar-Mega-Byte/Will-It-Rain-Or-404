@@ -4,6 +4,9 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 .env
+
+application.yml
+
 JUNIT5_TESTING_SUMMARY.md
 ### STS ###
 .apt_generated
