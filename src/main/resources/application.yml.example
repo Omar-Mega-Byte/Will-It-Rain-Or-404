@@ -1,0 +1,141 @@
+# Spring Boot application.yml.example - Template Configuration File
+# Copy this file to application.yml and fill in your actual values
+# DO NOT commit application.yml to version control - it contains sensitive data
+
+spring:
+    datasource:
+        # Database connection URL
+        # Format: jdbc:mysql://host:port/database_name?parameters
+        url: ${JDBC_URL:jdbc:mysql://localhost:3306/weather_app?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
+        # Database username
+        username: ${MYSQL_USER:root}
+        # Database password - LEAVE EMPTY for local development
+        password: ${MYSQL_PASSWORD:}
+        driver-class-name: com.mysql.cj.jdbc.Driver
+
+    jpa:
+        hibernate:
+            # DDL auto mode: create, create-drop, update, validate, none
+            ddl-auto: update
+        # Show SQL queries in logs
+        show-sql: true
+        database-platform: org.hibernate.dialect.MySQLDialect
+        properties:
+            hibernate:
+                '[format_sql]': true
+                dialect: org.hibernate.dialect.MySQLDialect
+                jdbc:
+                    '[batch_size]': 20
+                '[order_inserts]': true
+                '[order_updates]': true
+
+    profiles:
+        # Active Spring profile
+        active: ${SPRING_PROFILES_ACTIVE:default}
+
+    mail:
+        # SMTP server hostname
+        host: ${MAIL_HOST:localhost}
+        # SMTP server port (587 for TLS, 465 for SSL, 25 for plain)
+        port: ${MAIL_PORT:587}
+        # SMTP authentication username (your email)
+        username: ${MAIL_USERNAME:your-email@example.com}
+        # SMTP authentication password (app password for Gmail, etc.)
+        password: ${MAIL_PASSWORD:your-app-password}
+        properties:
+            mail:
+                smtp:
+                    # Enable SMTP authentication
+                    auth: ${MAIL_SMTP_AUTH:true}
+                    starttls:
+                        # Enable STARTTLS
+                        enable: ${MAIL_SMTP_STARTTLS_ENABLE:true}
+                        # Require STARTTLS
+                        required: ${MAIL_SMTP_STARTTLS_REQUIRED:false}
+                    # Connection timeout in milliseconds
+                    connectiontimeout: ${MAIL_SMTP_CONNECTION_TIMEOUT:5000}
+                    # Socket read timeout
+                    timeout: ${MAIL_SMTP_TIMEOUT:5000}
+                    # Socket write timeout
+                    writetimeout: ${MAIL_SMTP_WRITE_TIMEOUT:5000}
+                # Enable SMTP debug logging
+                debug: ${MAIL_DEBUG:false}
+
+server:
+    # Server port
+    port: ${SERVER_PORT:8080}
+    servlet:
+        # Application context path
+        context-path: ${SERVER_CONTEXT_PATH:/}
+
+logging:
+    level:
+        root: INFO
+        '[org.springframework.web]': DEBUG
+        '[org.hibernate]': ERROR
+        '[com.weather_found.weather_app.modules.weather]': DEBUG
+
+# JWT Configuration
+app:
+    jwt:
+        # JWT secret key - MUST be changed in production!
+        # Generate a secure random key (256 bits minimum)
+        secret: ${JWT_SECRET:change-this-secret-key-in-production-to-something-very-secure-and-long}
+        # JWT token expiration time in milliseconds (24 hours = 86400000)
+        expirationMs: ${JWT_EXPIRATION_MS:86400000}
+
+# Weather Module Configuration
+weather:
+    api:
+        openweathermap:
+            # Get your API key from: https://openweathermap.org/api
+            key: ${OPENWEATHERMAP_API_KEY:your-openweathermap-api-key-here}
+            # OpenWeatherMap API base URL
+            url: ${OPENWEATHERMAP_API_URL:https://api.openweathermap.org/data/2.5}
+        nasa:
+            # Get your API key from: https://api.nasa.gov/
+            key: ${NASA_API_KEY:your-nasa-api-key-here}
+            # NASA POWER API base URL
+            url: ${NASA_API_URL:https://power.larc.nasa.gov/api}
+        # API request timeout in milliseconds
+        timeout: ${WEATHER_API_TIMEOUT:5000}
+        # Maximum number of retry attempts
+        max-retries: ${WEATHER_API_MAX_RETRIES:3}
+        # Delay between retries in milliseconds
+        retry-delay: ${WEATHER_API_RETRY_DELAY:1000}
+
+    rate-limiting:
+        # Enable/disable rate limiting
+        enabled: ${WEATHER_RATE_LIMITING_ENABLED:true}
+        # Default requests per minute limit
+        default-limit: ${WEATHER_RATE_LIMIT_DEFAULT:60}
+        # Dashboard page requests per minute
+        dashboard-limit: ${WEATHER_RATE_LIMIT_DASHBOARD:30}
+        # Search requests per minute
+        search-limit: ${WEATHER_RATE_LIMIT_SEARCH:20}
+        # API endpoint requests per minute
+        api-limit: ${WEATHER_RATE_LIMIT_API:100}
+
+    security:
+        # Enable input validation
+        input-validation: ${WEATHER_SECURITY_INPUT_VALIDATION:true}
+        # Log suspicious activity
+        suspicious-activity-logging: ${WEATHER_SECURITY_SUSPICIOUS_LOGGING:true}
+        # Maximum block duration in minutes
+        max-block-duration: ${WEATHER_SECURITY_MAX_BLOCK_DURATION:60}
+
+    async:
+        # Core pool size for async operations
+        core-pool-size: ${WEATHER_ASYNC_CORE_POOL_SIZE:10}
+        # Maximum pool size for async operations
+        max-pool-size: ${WEATHER_ASYNC_MAX_POOL_SIZE:20}
+        # Queue capacity for async operations
+        queue-capacity: ${WEATHER_ASYNC_QUEUE_CAPACITY:500}
+
+    data:
+        # Weather data retention in days
+        retention-days: ${WEATHER_DATA_RETENTION_DAYS:365}
+        # Weather alerts retention in days
+        alert-retention-days: ${WEATHER_ALERT_RETENTION_DAYS:30}
+        # Log retention in days
+        log-retention-days: ${WEATHER_LOG_RETENTION_DAYS:7}
