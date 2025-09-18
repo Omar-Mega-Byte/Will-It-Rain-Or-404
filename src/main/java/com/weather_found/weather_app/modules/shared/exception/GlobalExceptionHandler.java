@@ -3,6 +3,7 @@ package com.weather_found.weather_app.modules.shared.exception;
 import com.weather_found.weather_app.modules.user.exception.InvalidUserException;
 import com.weather_found.weather_app.modules.user.exception.UserNotFoundException;
 import com.weather_found.weather_app.modules.user.exception.DatabaseOperationException;
+import com.weather_found.weather_app.modules.location.exception.LocationNotFoundException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,12 @@ import java.util.Map;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
+
+  // Location Module Exceptions
+  @ExceptionHandler(LocationNotFoundException.class)
+  public ResponseEntity<String> handleLocationNotFoundException(LocationNotFoundException ex) {
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+  }
 
   // User Module Exceptions
   @ExceptionHandler(InvalidUserException.class)

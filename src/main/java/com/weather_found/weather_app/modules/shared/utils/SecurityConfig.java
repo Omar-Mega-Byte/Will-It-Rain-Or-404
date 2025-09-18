@@ -14,6 +14,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.context.annotation.Profile;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
@@ -25,6 +26,7 @@ import java.util.Arrays;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
+@Profile("!test")
 public class SecurityConfig {
 
     @Autowired
@@ -56,11 +58,13 @@ public class SecurityConfig {
                         // Public endpoints - no authentication required
                         .requestMatchers("/").permitAll()
                         .requestMatchers("/api/auth/register", "/api/auth/login",
-                                        "/api/auth/forgot-password", "/api/auth/reset-password").permitAll()
+                                "/api/auth/forgot-password", "/api/auth/reset-password")
+                        .permitAll()
 
                         // Public documentation and health endpoints
                         .requestMatchers("/actuator/health", "/v3/api-docs/**",
-                                        "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                                "/swagger-ui/**", "/swagger-ui.html")
+                        .permitAll()
 
                         // Authentication required endpoints
                         .requestMatchers("/api/auth/logout", "/api/auth/refresh").authenticated()

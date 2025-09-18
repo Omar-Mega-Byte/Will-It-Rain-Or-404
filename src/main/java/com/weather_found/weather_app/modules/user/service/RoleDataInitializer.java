@@ -2,6 +2,7 @@ package com.weather_found.weather_app.modules.user.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import com.weather_found.weather_app.modules.user.model.Role;
@@ -11,6 +12,7 @@ import com.weather_found.weather_app.modules.user.repository.RoleRepository;
  * Initializes default roles in the database
  */
 @Component
+@ConditionalOnProperty(name = "app.roles.initialize", havingValue = "true", matchIfMissing = true)
 public class RoleDataInitializer implements CommandLineRunner {
 
     @Autowired
