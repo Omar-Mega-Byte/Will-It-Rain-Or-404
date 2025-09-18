@@ -18,13 +18,34 @@ const processQueue = (error, token = null) => {
   failedQueue = [];
 };
 
-// Set up axios interceptor to include JWT token in requests
+// Function to get CSRF token from cookies
+const getCsrfToken = () => {
+  const name = 'XSRF-TOKEN=';
+  const decodedCookie = decodeURIComponent(document.cookie);
+  const cookies = decodedCookie.split(';');
+  for (let cookie of cookies) {
+    cookie = cookie.trim();
+    if (cookie.indexOf(name) === 0) {
+      return cookie.substring(name.length);
+    }
+  }
+  return null;
+};
+
+// Set up axios interceptor to include JWT token and CSRF token in requests
 axios.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    // Include CSRF token for state-changing requests
+    const csrfToken = getCsrfToken();
+    if (csrfToken && ['post', 'put', 'delete', 'patch'].includes(config.method?.toLowerCase())) {
+      config.headers['X-XSRF-TOKEN'] = csrfToken;
+    }
+
     // Ensure Content-Type is application/json for all requests
     if (!config.headers['Content-Type']) {
       config.headers['Content-Type'] = 'application/json';
