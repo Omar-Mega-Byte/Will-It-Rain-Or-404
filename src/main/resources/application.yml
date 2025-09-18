@@ -5,19 +5,6 @@ spring:
         username: ${MYSQL_USER:root}
         password: ${MYSQL_PASSWORD:}
         driver-class-name: com.mysql.cj.jdbc.Driver
-    data:
-        redis:
-            host: ${REDIS_HOST:localhost}
-            port: ${REDIS_PORT:6379}
-            password: ${REDIS_PASSWORD:}
-            database: ${REDIS_DATABASE:0}
-            timeout: ${REDIS_TIMEOUT:5000}
-            lettuce:
-                pool:
-                    max-active: 20
-                    max-idle: 10
-                    min-idle: 5
-                    max-wait: -1ms
     jpa:
         hibernate:
             ddl-auto: update
@@ -73,7 +60,7 @@ app:
 weather:
     api:
         openweathermap:
-            key: ${OPENWEATHERMAP_API_KEY:demo-key}
+            key: ${OPENWEATHERMAP_API_KEY:a1ff2e2ee5c0afe84d8a8a6db035745c}
             url: ${OPENWEATHERMAP_API_URL:https://api.openweathermap.org/data/2.5}
         nasa:
             key: ${NASA_API_KEY:DEMO_KEY}
@@ -81,13 +68,6 @@ weather:
         timeout: ${WEATHER_API_TIMEOUT:5000}
         max-retries: ${WEATHER_API_MAX_RETRIES:3}
         retry-delay: ${WEATHER_API_RETRY_DELAY:1000}
-    
-    cache:
-        current-weather-ttl: ${WEATHER_CACHE_CURRENT_TTL:300} # 5 minutes
-        forecast-ttl: ${WEATHER_CACHE_FORECAST_TTL:1800} # 30 minutes
-        historical-ttl: ${WEATHER_CACHE_HISTORICAL_TTL:7200} # 2 hours
-        location-ttl: ${WEATHER_CACHE_LOCATION_TTL:3600} # 1 hour
-        alert-ttl: ${WEATHER_CACHE_ALERT_TTL:300} # 5 minutes
     
     rate-limiting:
         enabled: ${WEATHER_RATE_LIMITING_ENABLED:true}
@@ -110,6 +90,3 @@ weather:
         retention-days: ${WEATHER_DATA_RETENTION_DAYS:365}
         alert-retention-days: ${WEATHER_ALERT_RETENTION_DAYS:30}
         log-retention-days: ${WEATHER_LOG_RETENTION_DAYS:7}
-    
-    redis:
-        cache-ttl: ${WEATHER_REDIS_CACHE_TTL:300}
