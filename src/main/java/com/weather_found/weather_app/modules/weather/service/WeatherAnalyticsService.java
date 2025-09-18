@@ -37,6 +37,10 @@ public class WeatherAnalyticsService {
      */
     @Async
     public void trackApiRequest(String endpoint, String location, String userId) {
+        if (!isRedisAvailable()) {
+            log.debug("Redis not available, skipping analytics tracking");
+            return;
+        }
         try {
             String today = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE);
             String currentHour = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd-HH"));
@@ -77,6 +81,10 @@ public class WeatherAnalyticsService {
      */
     @Async
     public void trackError(String endpoint, String errorType, String userId) {
+        if (!isRedisAvailable()) {
+            log.debug("Redis not available, skipping error tracking");
+            return;
+        }
         try {
             String today = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE);
             String errorKey = ERROR_TRACKING_KEY + today + ":" + errorType;
@@ -101,6 +109,14 @@ public class WeatherAnalyticsService {
     public Map<String, Object> getDailyStats(String date) {
         Map<String, Object> stats = new HashMap<>();
 
+        if (!isRedisAvailable()) {
+            stats.put("date", date);
+            stats.put("totalRequests", 0);
+            stats.put("generatedAt", LocalDateTime.now());
+            stats.put("redisAvailable", false);
+            return stats;
+        }
+
         try {
             String dailyKey = DAILY_REQUESTS_KEY + date;
             Object requests = redisTemplate.opsForValue().get(dailyKey);
@@ -108,6 +124,7 @@ public class WeatherAnalyticsService {
             stats.put("date", date);
             stats.put("totalRequests", requests != null ? requests : 0);
             stats.put("generatedAt", LocalDateTime.now());
+            stats.put("redisAvailable", true);
 
         } catch (Exception e) {
             log.error("Error getting daily stats for date: {}", date, e);
@@ -123,6 +140,17 @@ public class WeatherAnalyticsService {
     public Map<String, Object> getHourlyStatsToday() {
         Map<String, Object> stats = new HashMap<>();
         Map<String, Object> hourlyData = new HashMap<>();
+
+        if (!isRedisAvailable()) {
+            for (int hour = 0; hour < 24; hour++) {
+                hourlyData.put(String.format("%02d:00", hour), 0);
+            }
+            stats.put("date", LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE));
+            stats.put("hourlyRequests", hourlyData);
+            stats.put("generatedAt", LocalDateTime.now());
+            stats.put("redisAvailable", false);
+            return stats;
+        }
 
         try {
             String today = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE);
@@ -151,12 +179,21 @@ public class WeatherAnalyticsService {
     public Map<String, Object> getTopEndpoints(int limit) {
         Map<String, Object> stats = new HashMap<>();
 
+        if (!isRedisAvailable()) {
+            stats.put("topEndpoints", new HashMap<>());
+            stats.put("limit", limit);
+            stats.put("generatedAt", LocalDateTime.now());
+            stats.put("redisAvailable", false);
+            return stats;
+        }
+
         try {
             Set<Object> topEndpoints = redisTemplate.opsForZSet().reverseRange(ENDPOINT_USAGE_KEY, 0, limit - 1);
 
             stats.put("topEndpoints", topEndpoints);
             stats.put("limit", limit);
             stats.put("generatedAt", LocalDateTime.now());
+            stats.put("redisAvailable", true);
 
         } catch (Exception e) {
             log.error("Error getting top endpoints", e);
@@ -172,12 +209,21 @@ public class WeatherAnalyticsService {
     public Map<String, Object> getTopLocations(int limit) {
         Map<String, Object> stats = new HashMap<>();
 
+        if (!isRedisAvailable()) {
+            stats.put("topLocations", new HashMap<>());
+            stats.put("limit", limit);
+            stats.put("generatedAt", LocalDateTime.now());
+            stats.put("redisAvailable", false);
+            return stats;
+        }
+
         try {
             Set<Object> topLocations = redisTemplate.opsForZSet().reverseRange(LOCATION_REQUESTS_KEY, 0, limit - 1);
 
             stats.put("topLocations", topLocations);
             stats.put("limit", limit);
             stats.put("generatedAt", LocalDateTime.now());
+            stats.put("redisAvailable", true);
 
         } catch (Exception e) {
             log.error("Error getting top locations", e);
@@ -193,6 +239,15 @@ public class WeatherAnalyticsService {
     public Map<String, Object> getUserActivity(String userId, int limit) {
         Map<String, Object> stats = new HashMap<>();
 
+        if (!isRedisAvailable()) {
+            stats.put("userId", userId);
+            stats.put("topEndpoints", new HashMap<>());
+            stats.put("limit", limit);
+            stats.put("generatedAt", LocalDateTime.now());
+            stats.put("redisAvailable", false);
+            return stats;
+        }
+
         try {
             String userKey = USER_ACTIVITY_KEY + userId;
             Set<Object> userActivity = redisTemplate.opsForZSet().reverseRange(userKey, 0, limit - 1);
@@ -201,6 +256,7 @@ public class WeatherAnalyticsService {
             stats.put("topEndpoints", userActivity);
             stats.put("limit", limit);
             stats.put("generatedAt", LocalDateTime.now());
+            stats.put("redisAvailable", true);
 
         } catch (Exception e) {
             log.error("Error getting user activity for user: {}", userId, e);
@@ -217,6 +273,14 @@ public class WeatherAnalyticsService {
         Map<String, Object> stats = new HashMap<>();
         Map<String, Object> errorData = new HashMap<>();
 
+        if (!isRedisAvailable()) {
+            stats.put("date", date);
+            stats.put("errors", errorData);
+            stats.put("generatedAt", LocalDateTime.now());
+            stats.put("redisAvailable", false);
+            return stats;
+        }
+
         try {
             String pattern = ERROR_TRACKING_KEY + date + "*";
             Set<String> errorKeys = redisTemplate.keys(pattern);
@@ -232,6 +296,7 @@ public class WeatherAnalyticsService {
             stats.put("date", date);
             stats.put("errors", errorData);
             stats.put("generatedAt", LocalDateTime.now());
+            stats.put("redisAvailable", true);
 
         } catch (Exception e) {
             log.error("Error getting error stats for date: {}", date, e);
@@ -280,6 +345,10 @@ public class WeatherAnalyticsService {
      * Reset analytics data (for testing or maintenance)
      */
     public void resetAnalytics() {
+        if (!isRedisAvailable()) {
+            log.debug("Redis not available, skipping analytics reset");
+            return;
+        }
         try {
             Set<String> analyticsKeys = redisTemplate.keys("analytics:*");
             if (analyticsKeys != null && !analyticsKeys.isEmpty()) {
@@ -289,5 +358,20 @@ public class WeatherAnalyticsService {
         } catch (Exception e) {
             log.error("Error resetting analytics data", e);
         }
+    }
+
+    /**
+     * Check if Redis is available
+     */
+    private boolean isRedisAvailable() {
+        try {
+            if (redisTemplate.getConnectionFactory() != null) {
+                redisTemplate.opsForValue().get("redis:health:check");
+                return true;
+            }
+        } catch (Exception e) {
+            log.debug("Redis not available: {}", e.getMessage());
+        }
+        return false;
     }
 }

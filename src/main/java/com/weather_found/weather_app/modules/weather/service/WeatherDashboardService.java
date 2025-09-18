@@ -43,11 +43,13 @@ public class WeatherDashboardService {
     public Map<String, Object> getWeatherDashboard(Long userId, String userRole) {
         String cacheKey = DASHBOARD_CACHE_KEY + userId + ":" + userRole;
 
-        @SuppressWarnings("unchecked")
-        Map<String, Object> cachedDashboard = (Map<String, Object>) redisTemplate.opsForValue().get(cacheKey);
+        if (isRedisConnected()) {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> cachedDashboard = (Map<String, Object>) redisTemplate.opsForValue().get(cacheKey);
 
-        if (cachedDashboard != null) {
-            return cachedDashboard;
+            if (cachedDashboard != null) {
+                return cachedDashboard;
+            }
         }
 
         Map<String, Object> dashboard = new HashMap<>();
@@ -76,8 +78,10 @@ public class WeatherDashboardService {
 
             dashboard.put("lastUpdated", LocalDateTime.now());
 
-            // Cache for 10 minutes
-            redisTemplate.opsForValue().set(cacheKey, dashboard, 10, TimeUnit.MINUTES);
+            // Cache for 10 minutes if Redis is available
+            if (isRedisConnected()) {
+                redisTemplate.opsForValue().set(cacheKey, dashboard, 10, TimeUnit.MINUTES);
+            }
 
         } catch (Exception e) {
             log.error("Error building weather dashboard", e);
@@ -93,11 +97,13 @@ public class WeatherDashboardService {
     public Map<String, Object> getLocationWeatherSummary(Long locationId) {
         String cacheKey = SUMMARY_CACHE_KEY + "location:" + locationId;
 
-        @SuppressWarnings("unchecked")
-        Map<String, Object> cachedSummary = (Map<String, Object>) redisTemplate.opsForValue().get(cacheKey);
+        if (isRedisConnected()) {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> cachedSummary = (Map<String, Object>) redisTemplate.opsForValue().get(cacheKey);
 
-        if (cachedSummary != null) {
-            return cachedSummary;
+            if (cachedSummary != null) {
+                return cachedSummary;
+            }
         }
 
         Map<String, Object> summary = new HashMap<>();
@@ -132,8 +138,10 @@ public class WeatherDashboardService {
             summary.put("location", location);
             summary.put("lastUpdated", LocalDateTime.now());
 
-            // Cache for 5 minutes
-            redisTemplate.opsForValue().set(cacheKey, summary, 5, TimeUnit.MINUTES);
+            // Cache for 5 minutes if Redis is available
+            if (isRedisConnected()) {
+                redisTemplate.opsForValue().set(cacheKey, summary, 5, TimeUnit.MINUTES);
+            }
 
         } catch (Exception e) {
             log.error("Error building location weather summary for location: {}", locationId, e);
@@ -149,11 +157,13 @@ public class WeatherDashboardService {
     public Map<String, Object> getWeatherAnalytics() {
         String cacheKey = ANALYTICS_CACHE_KEY + "general";
 
-        @SuppressWarnings("unchecked")
-        Map<String, Object> cachedAnalytics = (Map<String, Object>) redisTemplate.opsForValue().get(cacheKey);
+        if (isRedisConnected()) {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> cachedAnalytics = (Map<String, Object>) redisTemplate.opsForValue().get(cacheKey);
 
-        if (cachedAnalytics != null) {
-            return cachedAnalytics;
+            if (cachedAnalytics != null) {
+                return cachedAnalytics;
+            }
         }
 
         Map<String, Object> analytics = new HashMap<>();
@@ -184,8 +194,10 @@ public class WeatherDashboardService {
             // Temperature statistics
             analytics.put("temperatureStats", getTemperatureStatistics());
 
-            // Cache for 15 minutes
-            redisTemplate.opsForValue().set(cacheKey, analytics, 15, TimeUnit.MINUTES);
+            // Cache for 15 minutes if Redis is available
+            if (isRedisConnected()) {
+                redisTemplate.opsForValue().set(cacheKey, analytics, 15, TimeUnit.MINUTES);
+            }
 
         } catch (Exception e) {
             log.error("Error building weather analytics", e);
@@ -233,11 +245,13 @@ public class WeatherDashboardService {
     public Map<String, Object> getForecastDashboard(Long locationId, int days) {
         String cacheKey = DASHBOARD_CACHE_KEY + "forecast:" + locationId + ":" + days;
 
-        @SuppressWarnings("unchecked")
-        Map<String, Object> cachedForecast = (Map<String, Object>) redisTemplate.opsForValue().get(cacheKey);
+        if (isRedisConnected()) {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> cachedForecast = (Map<String, Object>) redisTemplate.opsForValue().get(cacheKey);
 
-        if (cachedForecast != null) {
-            return cachedForecast;
+            if (cachedForecast != null) {
+                return cachedForecast;
+            }
         }
 
         Map<String, Object> forecast = new HashMap<>();
@@ -260,8 +274,10 @@ public class WeatherDashboardService {
             forecast.put("days", days);
             forecast.put("generatedAt", LocalDateTime.now());
 
-            // Cache for 30 minutes
-            redisTemplate.opsForValue().set(cacheKey, forecast, 30, TimeUnit.MINUTES);
+            // Cache for 30 minutes if Redis is available
+            if (isRedisConnected()) {
+                redisTemplate.opsForValue().set(cacheKey, forecast, 30, TimeUnit.MINUTES);
+            }
 
         } catch (Exception e) {
             log.error("Error building forecast dashboard for location: {}", locationId, e);

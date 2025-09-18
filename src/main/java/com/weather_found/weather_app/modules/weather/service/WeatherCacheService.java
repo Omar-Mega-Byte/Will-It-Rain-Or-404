@@ -42,9 +42,11 @@ public class WeatherCacheService {
         // This would normally call external API
         String weatherJson = generateCurrentWeatherJson(location);
 
-        // Also store in Redis with custom TTL
-        String key = CURRENT_WEATHER_KEY + location.toLowerCase();
-        redisTemplate.opsForValue().set(key, weatherJson, 5, TimeUnit.MINUTES);
+        // Also store in Redis with custom TTL if available
+        if (isRedisAvailable()) {
+            String key = CURRENT_WEATHER_KEY + location.toLowerCase();
+            redisTemplate.opsForValue().set(key, weatherJson, 5, TimeUnit.MINUTES);
+        }
 
         return weatherJson;
     }
@@ -58,9 +60,11 @@ public class WeatherCacheService {
 
         String forecastJson = generateForecastJson(location, days);
 
-        // Store in Redis with 30-minute TTL
-        String key = FORECAST_KEY + location.toLowerCase() + ":" + days;
-        redisTemplate.opsForValue().set(key, forecastJson, 30, TimeUnit.MINUTES);
+        // Store in Redis with 30-minute TTL if available
+        if (isRedisAvailable()) {
+            String key = FORECAST_KEY + location.toLowerCase() + ":" + days;
+            redisTemplate.opsForValue().set(key, forecastJson, 30, TimeUnit.MINUTES);
+        }
 
         return forecastJson;
     }
@@ -74,9 +78,11 @@ public class WeatherCacheService {
 
         String historicalJson = generateHistoricalWeatherJson(location, startDate, endDate);
 
-        // Store in Redis with 2-hour TTL (historical data doesn't change)
-        String key = HISTORICAL_KEY + location.toLowerCase() + ":" + startDate + ":" + endDate;
-        redisTemplate.opsForValue().set(key, historicalJson, 2, TimeUnit.HOURS);
+        // Store in Redis with 2-hour TTL if available (historical data doesn't change)
+        if (isRedisAvailable()) {
+            String key = HISTORICAL_KEY + location.toLowerCase() + ":" + startDate + ":" + endDate;
+            redisTemplate.opsForValue().set(key, historicalJson, 2, TimeUnit.HOURS);
+        }
 
         return historicalJson;
     }
@@ -85,15 +91,20 @@ public class WeatherCacheService {
      * Cache user weather preferences
      */
     public void cacheUserPreferences(String userId, Object preferences) {
-        String key = USER_PREFERENCES_KEY + userId;
-        redisTemplate.opsForValue().set(key, preferences, 1, TimeUnit.HOURS);
-        log.info("Cached weather preferences for user: {}", userId);
+        if (isRedisAvailable()) {
+            String key = USER_PREFERENCES_KEY + userId;
+            redisTemplate.opsForValue().set(key, preferences, 1, TimeUnit.HOURS);
+            log.info("Cached weather preferences for user: {}", userId);
+        }
     }
 
     /**
      * Get cached user preferences
      */
     public Object getUserPreferences(String userId) {
+        if (!isRedisAvailable()) {
+            return null;
+        }
         String key = USER_PREFERENCES_KEY + userId;
         return redisTemplate.opsForValue().get(key);
     }
@@ -102,14 +113,19 @@ public class WeatherCacheService {
      * Track popular locations (using Redis sorted sets)
      */
     public void incrementLocationPopularity(String location) {
-        redisTemplate.opsForZSet().incrementScore(POPULAR_LOCATIONS_KEY, location.toLowerCase(), 1);
-        log.debug("Incremented popularity for location: {}", location);
+        if (isRedisAvailable()) {
+            redisTemplate.opsForZSet().incrementScore(POPULAR_LOCATIONS_KEY, location.toLowerCase(), 1);
+            log.debug("Incremented popularity for location: {}", location);
+        }
     }
 
     /**
      * Get popular locations
      */
     public Set<Object> getPopularLocations(int limit) {
+        if (!isRedisAvailable()) {
+            return null;
+        }
         return redisTemplate.opsForZSet().reverseRange(POPULAR_LOCATIONS_KEY, 0, limit - 1);
     }
 
@@ -117,15 +133,20 @@ public class WeatherCacheService {
      * Cache weather alerts
      */
     public void cacheWeatherAlert(String location, Object alert) {
-        String key = WEATHER_ALERTS_KEY + location.toLowerCase();
-        redisTemplate.opsForValue().set(key, alert, 1, TimeUnit.MINUTES);
-        log.info("Cached weather alert for location: {}", location);
+        if (isRedisAvailable()) {
+            String key = WEATHER_ALERTS_KEY + location.toLowerCase();
+            redisTemplate.opsForValue().set(key, alert, 1, TimeUnit.MINUTES);
+            log.info("Cached weather alert for location: {}", location);
+        }
     }
 
     /**
      * Get weather alerts
      */
     public Object getWeatherAlert(String location) {
+        if (!isRedisAvailable()) {
+            return null;
+        }
         String key = WEATHER_ALERTS_KEY + location.toLowerCase();
         return redisTemplate.opsForValue().get(key);
     }
@@ -135,6 +156,9 @@ public class WeatherCacheService {
      */
     @CacheEvict(value = { "currentWeather", "weatherForecast", "historicalWeather" }, key = "#location")
     public void clearLocationCache(String location) {
+        if (!isRedisAvailable()) {
+            return;
+        }
         // Also clear Redis keys
         String currentKey = CURRENT_WEATHER_KEY + location.toLowerCase();
         String forecastPattern = FORECAST_KEY + location.toLowerCase() + "*";
@@ -261,5 +285,20 @@ public class WeatherCacheService {
                     "cacheTimestamp": "%s"
                 }
                 """.formatted(location, startDate, endDate, LocalDateTime.now());
+    }
+
+    /**
+     * Check if Redis is available
+     */
+    private boolean isRedisAvailable() {
+        try {
+            if (redisTemplate.getConnectionFactory() != null) {
+                redisTemplate.opsForValue().get("redis:health:check");
+                return true;
+            }
+        } catch (Exception e) {
+            log.debug("Redis not available: {}", e.getMessage());
+        }
+        return false;
     }
 }
