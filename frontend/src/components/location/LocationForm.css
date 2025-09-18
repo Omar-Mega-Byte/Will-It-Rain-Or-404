@@ -1,0 +1,289 @@
+/* LocationForm.css */
+.location-form-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.location-form {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.form-header {
+  background: #f8f9fa;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.form-title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.form-body {
+  padding: 24px;
+}
+
+.form-section {
+  margin-bottom: 32px;
+}
+
+.form-section:last-child {
+  margin-bottom: 0;
+}
+
+.section-title {
+  margin: 0 0 16px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #495057;
+  border-bottom: 2px solid #e9ecef;
+  padding-bottom: 8px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+  color: #333;
+  font-size: 0.9rem;
+}
+
+.form-label.required::after {
+  content: ' *';
+  color: #dc3545;
+  font-weight: bold;
+}
+
+.form-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e9ecef;
+  border-radius: 6px;
+  font-size: 1rem;
+  background: white;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.form-input:disabled {
+  background: #f8f9fa;
+  opacity: 0.8;
+  cursor: not-allowed;
+}
+
+.form-input.error {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
+  line-height: 1.5;
+}
+
+.error-message {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.85rem;
+  color: #dc3545;
+  font-weight: 500;
+}
+
+.global-error {
+  background: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  color: #721c24;
+}
+
+.form-footer {
+  background: #f8f9fa;
+  padding: 20px 24px;
+  border-top: 1px solid #e9ecef;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 120px;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: #007bff;
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #0056b3;
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: #6c757d;
+  color: white;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #545b62;
+}
+
+/* Field hints and help text */
+.form-input::placeholder {
+  color: #adb5bd;
+  font-style: italic;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .location-form-container {
+    padding: 12px;
+  }
+  
+  .form-header {
+    padding: 16px 20px;
+  }
+  
+  .form-title {
+    font-size: 1.3rem;
+  }
+  
+  .form-body {
+    padding: 20px;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .form-section {
+    margin-bottom: 24px;
+  }
+  
+  .section-title {
+    font-size: 1rem;
+    margin-bottom: 12px;
+  }
+  
+  .form-group {
+    margin-bottom: 16px;
+  }
+  
+  .form-input {
+    padding: 10px 14px;
+    font-size: 0.95rem;
+  }
+  
+  .form-footer {
+    padding: 16px 20px;
+    flex-direction: column-reverse;
+  }
+  
+  .btn {
+    width: 100%;
+    min-width: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .location-form-container {
+    padding: 8px;
+  }
+  
+  .form-header {
+    padding: 12px 16px;
+  }
+  
+  .form-body {
+    padding: 16px;
+  }
+  
+  .form-footer {
+    padding: 12px 16px;
+  }
+  
+  .form-input {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+  }
+  
+  .section-title {
+    font-size: 0.95rem;
+  }
+}
+
+/* Focus styles for accessibility */
+.btn:focus {
+  outline: 2px solid #007bff;
+  outline-offset: 2px;
+}
+
+.form-input:focus {
+  outline: none;
+}
+
+/* Animation for form submission */
+.btn:active {
+  transform: translateY(0);
+}
+
+/* Loading state indicator */
+.btn:disabled::after {
+  content: '';
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-left: 8px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

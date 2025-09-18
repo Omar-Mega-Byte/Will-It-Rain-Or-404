@@ -1,0 +1,482 @@
+/* System Metrics Styles */
+.system-metrics {
+  padding: 30px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.system-metrics-loading,
+.system-metrics-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.system-metrics-loading p {
+  color: #64748b;
+  font-size: 1.1rem;
+  margin-top: 15px;
+}
+
+.loading-spinner {
+  font-size: 3rem;
+  margin-bottom: 15px;
+}
+
+.error-icon {
+  font-size: 3rem;
+  margin-bottom: 15px;
+}
+
+.system-metrics-error h3 {
+  color: #dc2626;
+  font-size: 1.5rem;
+  margin: 0 0 10px 0;
+}
+
+.system-metrics-error p {
+  color: #64748b;
+  margin-bottom: 25px;
+}
+
+.retry-button {
+  padding: 12px 25px;
+  background: #dc2626;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.retry-button:hover {
+  background: #b91c1c;
+  transform: translateY(-2px);
+}
+
+/* Header */
+.metrics-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #f1f5f9;
+}
+
+.header-content h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 8px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header-content p {
+  color: #64748b;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.time-range-selector {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.time-range-selector label {
+  font-weight: 600;
+  color: #374151;
+}
+
+.time-range-selector select {
+  padding: 8px 15px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  background: white;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.time-range-selector select:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.refresh-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.refresh-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+/* Sections */
+.stats-section,
+.detailed-metrics-section,
+.insights-section,
+.health-summary-section {
+  margin-bottom: 40px;
+}
+
+.stats-section h3,
+.detailed-metrics-section h3,
+.insights-section h3,
+.health-summary-section h3 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Stats Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+/* Health Status */
+.health-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.health-status-large {
+  font-size: 1.2rem;
+  padding: 10px 15px;
+  border-radius: 10px;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Metrics Tabs */
+.metrics-tabs {
+  display: flex;
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 6px;
+  gap: 6px;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+}
+
+.metrics-tabs button {
+  padding: 10px 20px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #64748b;
+  flex: 1;
+  min-width: 120px;
+}
+
+.metrics-tabs button.active {
+  background: #667eea;
+  color: white;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.metrics-tabs button:hover:not(.active) {
+  background: #e2e8f0;
+}
+
+/* Metrics Content */
+.metrics-content {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.metric-group {
+  background: white;
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.metric-group h4 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 20px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.metric-card {
+  background: #f8fafc;
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.metric-card:hover {
+  transform: translateY(-2px);
+  border-color: #667eea;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+}
+
+.metric-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 5px;
+}
+
+.metric-unit {
+  font-size: 1rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.metric-label {
+  color: #64748b;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+/* Insights Grid */
+.insights-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.insight-card {
+  background: white;
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  border-left: 4px solid #667eea;
+}
+
+.insight-card.warning {
+  border-left-color: #f59e0b;
+}
+
+.insight-card.critical {
+  border-left-color: #ef4444;
+}
+
+.insight-card.success {
+  border-left-color: #10b981;
+}
+
+.insight-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.insight-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+.insight-icon {
+  font-size: 1.5rem;
+}
+
+.insight-header h4 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+}
+
+.insight-card p {
+  color: #64748b;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.no-insights {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 40px 20px;
+  color: #64748b;
+}
+
+.no-insights-icon {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 15px;
+}
+
+/* Health Summary */
+.health-summary-card {
+  background: white;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.health-overview {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  margin-bottom: 30px;
+  padding-bottom: 25px;
+  border-bottom: 2px solid #f1f5f9;
+}
+
+.health-details p {
+  margin: 8px 0;
+  color: #64748b;
+}
+
+.health-details strong {
+  color: #1e293b;
+}
+
+.services-status h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 15px 0;
+}
+
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+.service-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 15px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.service-name {
+  font-weight: 500;
+  color: #374151;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .system-metrics {
+    padding: 20px;
+  }
+
+  .metrics-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  .header-content h2 {
+    font-size: 1.6rem;
+  }
+
+  .header-controls {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .metrics-tabs {
+    flex-direction: column;
+  }
+
+  .metrics-tabs button {
+    min-width: unset;
+  }
+
+  .metric-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .insights-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .health-overview {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  .services-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-content h2 {
+    font-size: 1.4rem;
+  }
+
+  .metric-group {
+    padding: 20px;
+  }
+
+  .insight-card {
+    padding: 20px;
+  }
+
+  .health-summary-card {
+    padding: 20px;
+  }
+}
