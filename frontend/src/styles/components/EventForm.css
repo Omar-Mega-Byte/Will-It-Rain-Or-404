@@ -5,7 +5,7 @@
 
 .event-form {
   background: white;
-  border-radius: 1rem;
+  border-radius: 12px;
   max-width: 100%;
 }
 
@@ -16,13 +16,13 @@
 /* Form Header */
 .event-form-header {
   padding: 2rem 2rem 1rem 2rem;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid #e2e8f0;
 }
 
 .event-form-title {
   font-size: 1.5rem;
   font-weight: 600;
-  color: #111827;
+  color: #1e293b;
   margin: 0;
 }
 
@@ -50,7 +50,7 @@
 .event-form-label {
   font-weight: 600;
   color: #374151;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -65,9 +65,9 @@
 .event-form-input {
   padding: 0.75rem 1rem;
   border: 1px solid #d1d5db;
-  border-radius: 0.5rem;
-  font-size: 0.95rem;
-  transition: all 0.3s ease;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
   background: white;
 }
 
@@ -90,11 +90,11 @@
 .event-form-select {
   padding: 0.75rem 1rem;
   border: 1px solid #d1d5db;
-  border-radius: 0.5rem;
-  font-size: 0.95rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
   background: white;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 }
 
 .event-form-select:focus {
@@ -118,7 +118,7 @@
 
 .event-form-error {
   color: #dc2626;
-  font-size: 0.85rem;
+  font-size: 0.8125rem;
   font-weight: 500;
   display: flex;
   align-items: center;
@@ -157,22 +157,22 @@
   gap: 0.5rem;
   padding: 0.75rem 1rem;
   border: 2px dashed #d1d5db;
-  border-radius: 0.5rem;
+  border-radius: 6px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  color: #6b7280;
-  font-weight: 500;
+  transition: all 0.2s ease;
+  color: #64748b;
+  background: #f8fafc;
 }
 
 .event-form-file-label:hover {
   border-color: #9ca3af;
-  background: #f9fafb;
+  background: #f1f5f9;
 }
 
 .event-form-file-label.has-file {
   border-color: #10b981;
   background: #ecfdf5;
-  color: #059669;
+  color: #065f46;
 }
 
 .event-form-file-label svg {
@@ -185,35 +185,36 @@
 .event-form-radio {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 0;
+  gap: 0.5rem;
 }
 
 .event-form-checkbox input,
 .event-form-radio input {
-  width: 1.25rem;
-  height: 1.25rem;
-  cursor: pointer;
+  width: 1rem;
+  height: 1rem;
+  accent-color: #3b82f6;
 }
 
 .event-form-checkbox label,
 .event-form-radio label {
-  cursor: pointer;
-  font-weight: 500;
+  font-size: 0.875rem;
   color: #374151;
 }
 
-/* Location Section */
-.event-form-location {
+/* Section Headers */
+.event-form-location,
+.event-form-weather,
+.event-form-reminder {
   background: #f8fafc;
-  border-radius: 0.75rem;
+  border-radius: 8px;
   padding: 1.5rem;
-  border: 1px solid #e2e8f0;
   margin: 1rem 0;
 }
 
-.event-form-location-title {
-  font-size: 1.1rem;
+.event-form-location-title,
+.event-form-weather-title,
+.event-form-reminder-title {
+  font-size: 1rem;
   font-weight: 600;
   color: #374151;
   margin: 0 0 1rem 0;
@@ -222,124 +223,74 @@
   gap: 0.5rem;
 }
 
-.event-form-location-title svg {
+.event-form-location-title svg,
+.event-form-weather-title svg,
+.event-form-reminder-title svg {
   width: 1.25rem;
   height: 1.25rem;
-  color: #6b7280;
-}
-
-/* Weather Section */
-.event-form-weather {
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-  border-radius: 0.75rem;
-  padding: 1.5rem;
-  border: 1px solid #bae6fd;
-  margin: 1rem 0;
-}
-
-.event-form-weather-title {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #0c4a6e;
-  margin: 0 0 1rem 0;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.event-form-weather-title svg {
-  width: 1.25rem;
-  height: 1.25rem;
-  color: #0369a1;
+  color: #64748b;
 }
 
 .event-form-weather-toggle {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.5rem;
   margin-bottom: 1rem;
 }
 
 .event-form-weather-info {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-}
-
-/* Reminder Section */
-.event-form-reminder {
-  background: #fef7ff;
-  border-radius: 0.75rem;
-  padding: 1.5rem;
-  border: 1px solid #e9d5ff;
-  margin: 1rem 0;
-}
-
-.event-form-reminder-title {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #7c2d12;
-  margin: 0 0 1rem 0;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.event-form-reminder-title svg {
-  width: 1.25rem;
-  height: 1.25rem;
-  color: #a855f7;
+  background: #eff6ff;
+  padding: 1rem;
+  border-radius: 6px;
+  border: 1px solid #bfdbfe;
 }
 
 /* Form Actions */
 .event-form-actions {
+  padding: 1.5rem 2rem;
+  border-top: 1px solid #e2e8f0;
+  background: #f8fafc;
   display: flex;
   justify-content: flex-end;
   gap: 1rem;
-  padding: 1.5rem 2rem 2rem 2rem;
-  border-top: 1px solid #f3f4f6;
-  margin-top: 1rem;
 }
 
 .event-form-btn {
-  padding: 0.75rem 2rem;
-  border-radius: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
   font-weight: 600;
-  font-size: 0.95rem;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   border: none;
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  font-size: 0.875rem;
 }
 
 .event-form-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-  pointer-events: none;
 }
 
 .event-form-btn-cancel {
-  background: #f3f4f6;
+  background: white;
   color: #374151;
   border: 1px solid #d1d5db;
 }
 
 .event-form-btn-cancel:hover {
-  background: #e5e7eb;
+  background: #f9fafb;
   border-color: #9ca3af;
 }
 
 .event-form-btn-submit {
-  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  background: #3b82f6;
   color: white;
-  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
 }
 
 .event-form-btn-submit:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+  background: #2563eb;
 }
 
 .event-form-btn-loading {
@@ -349,11 +300,13 @@
 .event-form-btn-loading::after {
   content: '';
   position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
   width: 1rem;
   height: 1rem;
-  margin: auto;
-  border: 2px solid transparent;
-  border-top: 2px solid currentColor;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -367,7 +320,7 @@
 .event-form-validation {
   background: #fef2f2;
   border: 1px solid #fecaca;
-  border-radius: 0.75rem;
+  border-radius: 8px;
   padding: 1rem;
   margin-bottom: 1.5rem;
 }
@@ -375,11 +328,11 @@
 .event-form-validation-title {
   font-weight: 600;
   color: #991b1b;
-  font-size: 0.95rem;
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 0.75rem 0;
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  font-size: 0.875rem;
 }
 
 .event-form-validation-list {
@@ -389,9 +342,9 @@
 }
 
 .event-form-validation-item {
-  color: #7f1d1d;
-  font-size: 0.85rem;
-  padding: 0.25rem 0;
+  color: #dc2626;
+  font-size: 0.8125rem;
+  margin-bottom: 0.25rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -401,14 +354,13 @@
 .event-form-success {
   background: #ecfdf5;
   border: 1px solid #a7f3d0;
-  border-radius: 0.75rem;
+  border-radius: 8px;
   padding: 1rem;
   margin-bottom: 1.5rem;
   color: #065f46;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-weight: 500;
+  gap: 0.75rem;
 }
 
 .event-form-success svg {
@@ -417,87 +369,38 @@
   color: #10b981;
 }
 
-/* Progress Steps */
-.event-form-steps {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 2rem;
-  padding: 1rem 2rem;
-}
-
-.event-form-step {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: all 0.3s ease;
-}
-
-.event-form-step.active {
-  background: #dbeafe;
-  color: #1e40af;
-}
-
-.event-form-step.completed {
-  background: #d1fae5;
-  color: #065f46;
-}
-
-.event-form-step:not(:last-child)::after {
-  content: '→';
-  margin-left: 1rem;
-  color: #9ca3af;
-}
-
 /* Responsive Design */
 @media (max-width: 768px) {
-  .event-form-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
+  .event-form-header {
+    padding: 1.5rem 1.5rem 1rem 1.5rem;
   }
   
   .event-form-body {
     padding: 1.5rem;
   }
   
-  .event-form-header {
-    padding: 1.5rem 1.5rem 1rem 1.5rem;
+  .event-form-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
   }
   
   .event-form-actions {
-    padding: 1rem 1.5rem 1.5rem 1.5rem;
+    padding: 1rem 1.5rem;
     flex-direction: column-reverse;
   }
   
   .event-form-btn {
+    width: 100%;
     justify-content: center;
-  }
-  
-  .event-form-weather-info {
-    grid-template-columns: 1fr;
-    gap: 0.75rem;
-  }
-  
-  .event-form-steps {
-    padding: 1rem;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
-  
-  .event-form-step:not(:last-child)::after {
-    display: none;
   }
 }
 
 @media (max-width: 480px) {
-  .event-form-body {
+  .event-form-header {
     padding: 1rem;
   }
   
-  .event-form-header {
+  .event-form-body {
     padding: 1rem;
   }
   
@@ -510,17 +413,9 @@
   .event-form-reminder {
     padding: 1rem;
   }
-  
-  .event-form-title {
-    font-size: 1.25rem;
-  }
-  
-  .event-form-btn {
-    padding: 0.875rem 1.5rem;
-  }
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% { transform: translateY(-50%) rotate(0deg); }
+  100% { transform: translateY(-50%) rotate(360deg); }
 }

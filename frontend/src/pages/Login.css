@@ -266,7 +266,7 @@
 
 .nav-link {
   text-decoration: none;
-  color: var(--gray-600);
+  color: #374151 !important;
   font-weight: 500;
   padding: var(--space-2) var(--space-4);
   border-radius: var(--radius-md);
@@ -491,9 +491,9 @@
   border: 2px solid var(--gray-200);
   border-radius: var(--radius-lg);
   font-size: var(--font-base);
-  background: var(--white);
+  background: var(--white) !important;
   transition: var(--transition-base);
-  color: var(--gray-900);
+  color: #1f2937 !important;
 }
 
 .form-input:focus {
