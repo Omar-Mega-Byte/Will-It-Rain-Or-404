@@ -10,7 +10,7 @@ const Register = () => {
     password: '',
     confirmPassword: '',
     firstName: '',
-    lastName: '',
+    lastName: ''
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -141,20 +141,12 @@ const Register = () => {
         <div className="gradient-orb orb-1"></div>
         <div className="gradient-orb orb-2"></div>
         <div className="gradient-orb orb-3"></div>
-        <div className="floating-elements">
-          <div className="element element-1">☁️</div>
-          <div className="element element-2">🌤️</div>
-          <div className="element element-3">⛅</div>
-          <div className="element element-4">🌦️</div>
-          <div className="element element-5">🌈</div>
-        </div>
       </div>
 
       {/* Navigation */}
       <nav className="register-nav">
         <div className="nav-container">
           <Link to="/" className="nav-brand">
-            <span className="brand-icon">🌦️</span>
             <span className="brand-text">WeatherVision</span>
           </Link>
           <div className="nav-links">
@@ -264,7 +256,6 @@ const Register = () => {
                       <div className="form-group">
                         <label htmlFor="firstName" className="form-label">First Name</label>
                         <div className="input-wrapper">
-                          <span className="input-icon">👤</span>
                           <input
                             type="text"
                             id="firstName"
@@ -281,7 +272,6 @@ const Register = () => {
                       <div className="form-group">
                         <label htmlFor="lastName" className="form-label">Last Name</label>
                         <div className="input-wrapper">
-                          <span className="input-icon">👤</span>
                           <input
                             type="text"
                             id="lastName"
@@ -299,7 +289,6 @@ const Register = () => {
                     <div className="form-group">
                       <label htmlFor="email" className="form-label">Email Address</label>
                       <div className="input-wrapper">
-                        <span className="input-icon">📧</span>
                         <input
                           type="email"
                           id="email"
@@ -328,7 +317,6 @@ const Register = () => {
                     <div className="form-group">
                       <label htmlFor="username" className="form-label">Username</label>
                       <div className="input-wrapper">
-                        <span className="input-icon">🏷️</span>
                         <input
                           type="text"
                           id="username"
@@ -345,7 +333,6 @@ const Register = () => {
                     <div className="form-group">
                       <label htmlFor="password" className="form-label">Password</label>
                       <div className="input-wrapper">
-                        <span className="input-icon">🔒</span>
                         <input
                           type={showPassword ? "text" : "password"}
                           id="password"
@@ -358,10 +345,10 @@ const Register = () => {
                         />
                         <button
                           type="button"
-                          onClick={() => togglePasswordVisibility('password')}
+                          onClick={() => setShowPassword(!showPassword)}
                           className="password-toggle"
                         >
-                          {showPassword ? "👁️" : "👁️‍🗨️"}
+                          {showPassword ? "Hide" : "Show"}
                         </button>
                       </div>
 
@@ -406,7 +393,6 @@ const Register = () => {
                     <div className="form-group">
                       <label htmlFor="confirmPassword" className="form-label">Confirm Password</label>
                       <div className="input-wrapper">
-                        <span className="input-icon">🔒</span>
                         <input
                           type={showConfirmPassword ? "text" : "password"}
                           id="confirmPassword"
@@ -419,10 +405,10 @@ const Register = () => {
                         />
                         <button
                           type="button"
-                          onClick={() => togglePasswordVisibility('confirmPassword')}
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                           className="password-toggle"
                         >
-                          {showConfirmPassword ? "👁️" : "👁️‍🗨️"}
+                          {showConfirmPassword ? "Hide" : "Show"}
                         </button>
                       </div>
                       {formData.confirmPassword && (

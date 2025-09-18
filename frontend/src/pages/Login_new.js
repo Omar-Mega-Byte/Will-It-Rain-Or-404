@@ -74,7 +74,6 @@ const Login = () => {
       <nav className="login-nav">
         <div className="nav-container">
           <Link to="/" className="nav-brand">
-            <span className="brand-icon">🌦️</span>
             <span className="brand-text">WeatherVision</span>
           </Link>
           <div className="nav-links">
@@ -146,7 +145,6 @@ const Login = () => {
                 <div className="form-group">
                   <label htmlFor="username" className="form-label">Username or Email</label>
                   <div className="input-wrapper">
-                    <span className="input-icon">👤</span>
                     <input
                       type="text"
                       id="username"
@@ -163,7 +161,6 @@ const Login = () => {
                 <div className="form-group">
                   <label htmlFor="password" className="form-label">Password</label>
                   <div className="input-wrapper">
-                    <span className="input-icon">🔒</span>
                     <input
                       type={showPassword ? "text" : "password"}
                       id="password"
@@ -179,7 +176,7 @@ const Login = () => {
                       onClick={togglePasswordVisibility}
                       className="password-toggle"
                     >
-                      {showPassword ? "👁️" : "👁️‍🗨️"}
+                      {showPassword ? "Hide" : "Show"}
                     </button>
                   </div>
                 </div>

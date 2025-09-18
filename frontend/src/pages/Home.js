@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import weatherService from '../services/weatherService';
 import './Home_new.css';
 
 const Home = () => {
@@ -10,6 +11,8 @@ const Home = () => {
     accuracy: 0,
     countries: 0
   });
+  const [weatherData, setWeatherData] = useState(null);
+  const [isLoadingWeather, setIsLoadingWeather] = useState(true);
 
   // Testimonials carousel
   const testimonials = [
@@ -38,6 +41,43 @@ const Home = () => {
       rating: 5
     }
   ];
+
+  // Fetch real weather data on component mount
+  useEffect(() => {
+    const fetchWeatherData = async () => {
+      try {
+        setIsLoadingWeather(true);
+        const data = await weatherService.getRandomWeather();
+        setWeatherData(data);
+      } catch (error) {
+        console.error('Error fetching weather data:', error);
+        // Set fallback data if API fails
+        setWeatherData({
+          location: {
+            name: "New York",
+            country: "US"
+          },
+          current: {
+            temperature: "22°C",
+            condition: "Partly Cloudy",
+            humidity: "65%",
+            pressure: "1013 hPa",
+            windSpeed: "12 km/h",
+            visibility: "10 km"
+          }
+        });
+      } finally {
+        setIsLoadingWeather(false);
+      }
+    };
+
+    fetchWeatherData();
+
+    // Refresh weather data every 5 minutes
+    const weatherInterval = setInterval(fetchWeatherData, 5 * 60 * 1000);
+
+    return () => clearInterval(weatherInterval);
+  }, []);
 
   // Auto-rotate testimonials
   useEffect(() => {
@@ -69,6 +109,39 @@ const Home = () => {
       animateValue(0, 195, 1800, (val) => setAnimatedStats(prev => ({ ...prev, countries: val })));
     }, 500);
   }, []);
+
+  // Helper function to get weather icon based on condition
+  const getWeatherIcon = (condition) => {
+    const conditionLower = condition?.toLowerCase() || '';
+    if (conditionLower.includes('clear') || conditionLower.includes('sunny')) return '☀️';
+    if (conditionLower.includes('cloud')) return '⛅';
+    if (conditionLower.includes('rain')) return '🌧️';
+    if (conditionLower.includes('snow')) return '❄️';
+    if (conditionLower.includes('storm')) return '⛈️';
+    if (conditionLower.includes('fog') || conditionLower.includes('mist')) return '🌫️';
+    return '☀️'; // default
+  };
+
+  // Helper function to format temperature
+  const formatTemperature = (temp) => {
+    if (typeof temp === 'string') return temp;
+    if (typeof temp === 'number') return `${Math.round(temp)}°C`;
+    return '22°C';
+  };
+
+  // Helper function to format wind speed
+  const formatWindSpeed = (speed) => {
+    if (typeof speed === 'string') return speed;
+    if (typeof speed === 'number') return `${Math.round(speed)} km/h`;
+    return '12 km/h';
+  };
+
+  // Helper function to format pressure
+  const formatPressure = (pressure) => {
+    if (typeof pressure === 'string') return pressure;
+    if (typeof pressure === 'number') return `${Math.round(pressure)} hPa`;
+    return '1013 hPa';
+  };
 
   return (
     <div className="home-page">
@@ -142,20 +215,33 @@ const Home = () => {
               <div className="dashboard-header">
                 <div className="header-left">
                   <span className="location-icon">📍</span>
-                  <span>San Francisco, CA</span>
+                  <span>
+                    {isLoadingWeather
+                      ? 'Loading...'
+                      : `${weatherData?.location?.name || 'Unknown'}, ${weatherData?.location?.country || 'Unknown'}`
+                    }
+                  </span>
                 </div>
-                <div className="header-right">15:50</div>
+                <div className="header-right">{new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
               </div>
 
               <div className="weather-main">
                 <div className="weather-icon-container">
                   <div className="weather-effects"></div>
-                  <div className="weather-icon">☀️</div>
+                  <div className="weather-icon">
+                    {isLoadingWeather ? '🔄' : getWeatherIcon(weatherData?.current?.condition)}
+                  </div>
                 </div>
                 <div className="weather-info">
-                  <div className="temperature">24°C</div>
-                  <div className="condition">Mostly Sunny</div>
-                  <div className="feels-like">Feels like 27°C</div>
+                  <div className="temperature">
+                    {isLoadingWeather ? '--°C' : formatTemperature(weatherData?.current?.temperature)}
+                  </div>
+                  <div className="condition">
+                    {isLoadingWeather ? 'Loading...' : (weatherData?.current?.condition || 'Unknown')}
+                  </div>
+                  <div className="feels-like">
+                    Feels like {isLoadingWeather ? '--°C' : formatTemperature(weatherData?.current?.feelsLike || weatherData?.current?.temperature)}
+                  </div>
                 </div>
               </div>
 
@@ -163,28 +249,36 @@ const Home = () => {
                 <div className="detail-item">
                   <div className="detail-icon">💨</div>
                   <div className="detail-content">
-                    <div className="detail-value">15 km/h</div>
+                    <div className="detail-value">
+                      {isLoadingWeather ? '--' : formatWindSpeed(weatherData?.current?.windSpeed)}
+                    </div>
                     <div className="detail-label">Wind</div>
                   </div>
                 </div>
                 <div className="detail-item">
                   <div className="detail-icon">💧</div>
                   <div className="detail-content">
-                    <div className="detail-value">68%</div>
+                    <div className="detail-value">
+                      {isLoadingWeather ? '--' : (weatherData?.current?.humidity || '65%')}
+                    </div>
                     <div className="detail-label">Humidity</div>
                   </div>
                 </div>
                 <div className="detail-item">
                   <div className="detail-icon">👁️</div>
                   <div className="detail-content">
-                    <div className="detail-value">10 km</div>
+                    <div className="detail-value">
+                      {isLoadingWeather ? '--' : (weatherData?.current?.visibility || '10 km')}
+                    </div>
                     <div className="detail-label">Visibility</div>
                   </div>
                 </div>
                 <div className="detail-item">
                   <div className="detail-icon">📊</div>
                   <div className="detail-content">
-                    <div className="detail-value">1013 mb</div>
+                    <div className="detail-value">
+                      {isLoadingWeather ? '--' : formatPressure(weatherData?.current?.pressure)}
+                    </div>
                     <div className="detail-label">Pressure</div>
                   </div>
                 </div>
@@ -193,28 +287,28 @@ const Home = () => {
               <div className="forecast-hourly">
                 <div className="hourly-item">
                   <div className="hourly-time">12 PM</div>
-                  <div className="hourly-icon">☀️</div>
-                  <div className="hourly-temp">26°</div>
+                  <div className="hourly-icon">{getWeatherIcon(weatherData?.current?.condition)}</div>
+                  <div className="hourly-temp">{formatTemperature(weatherData?.current?.temperature)}</div>
                 </div>
                 <div className="hourly-item">
                   <div className="hourly-time">1 PM</div>
-                  <div className="hourly-icon">☀️</div>
-                  <div className="hourly-temp">25°</div>
+                  <div className="hourly-icon">{getWeatherIcon(weatherData?.current?.condition)}</div>
+                  <div className="hourly-temp">{formatTemperature(weatherData?.current?.temperature)}</div>
                 </div>
                 <div className="hourly-item active">
                   <div className="hourly-time">2 PM</div>
-                  <div className="hourly-icon">☀️</div>
-                  <div className="hourly-temp">24°</div>
+                  <div className="hourly-icon">{getWeatherIcon(weatherData?.current?.condition)}</div>
+                  <div className="hourly-temp">{formatTemperature(weatherData?.current?.temperature)}</div>
                 </div>
                 <div className="hourly-item">
                   <div className="hourly-time">3 PM</div>
                   <div className="hourly-icon">⛅</div>
-                  <div className="hourly-temp">22°</div>
+                  <div className="hourly-temp">{formatTemperature((weatherData?.current?.temperature || 22) - 2)}</div>
                 </div>
                 <div className="hourly-item">
                   <div className="hourly-time">4 PM</div>
                   <div className="hourly-icon">🌧️</div>
-                  <div className="hourly-temp">21°</div>
+                  <div className="hourly-temp">{formatTemperature((weatherData?.current?.temperature || 22) - 3)}</div>
                 </div>
               </div>
             </div>
