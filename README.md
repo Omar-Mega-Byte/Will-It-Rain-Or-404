@@ -238,6 +238,19 @@ Once the backend is running, you can access the interactive API documentation:
 
 ## ⚙️ Environment Configuration
 
+### Backend Configuration
+
+1. **Copy the example configuration file:**
+   ```bash
+   cp src/main/resources/application.yml.example src/main/resources/application.yml
+   ```
+
+2. **Edit `application.yml`** with your actual values:
+   - Database credentials
+   - API keys (OpenWeatherMap, NASA)
+   - JWT secret
+   - Email settings
+
 ### Backend Environment Variables
 
 | Variable | Default | Description |
@@ -247,6 +260,13 @@ Once the backend is running, you can access the interactive API documentation:
 | `MYSQL_PASSWORD` | `` | MySQL password |
 | `JDBC_URL` | `jdbc:mysql://localhost:3306/weather_app...` | Database URL |
 | `SPRING_PROFILES_ACTIVE` | `default` | Active Spring profile |
+| `JWT_SECRET` | `change-this-secret-key-in-production...` | JWT signing key |
+| `OPENWEATHERMAP_API_KEY` | `your-openweathermap-api-key-here` | Weather API key |
+| `NASA_API_KEY` | `your-nasa-api-key-here` | NASA API key |
+| `MAIL_HOST` | `localhost` | SMTP server hostname |
+| `MAIL_PORT` | `587` | SMTP server port |
+| `MAIL_USERNAME` | `your-email@example.com` | SMTP username |
+| `MAIL_PASSWORD` | `your-app-password` | SMTP password |
 
 ### Frontend Environment Variables
 
