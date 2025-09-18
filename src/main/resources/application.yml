@@ -60,7 +60,7 @@ app:
 weather:
     api:
         openweathermap:
-            key: ${OPENWEATHERMAP_API_KEY:YOURAPIKEY}
+            key: ${OPENWEATHERMAP_API_KEY:YOUR API KEY}
             url: ${OPENWEATHERMAP_API_URL:https://api.openweathermap.org/data/2.5}
         nasa:
             key: ${NASA_API_KEY:DEMO_KEY}
