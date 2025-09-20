@@ -21,13 +21,6 @@ Build a modular ML pipeline that: (1) acquires and subsets NASA Earth observatio
 
 ***
 
-### Interfaces with backend/frontend
-
-- Input contract (from backend): location geometry (point lat,lon; or polygon GeoJSON), target day-of-year (single day), optional time window (±N days around DOY), variable set requested, year range.[^1]
-- Output contract (to backend/UI): probabilities for each condition, summary stats (mean, median, percentiles), trend info, uncertainty bounds, sample sizes, provenance metadata (dataset ids, services, query ranges), downloadable CSV/JSON links.[^1]
-
-***
-
 ### Datasets and access
 
 Preferred sources (choose one per variable based on coverage and latency; prioritize consistent temporal coverage):
@@ -204,17 +197,17 @@ These choices align with challenge expectations for probabilities and extreme li
 
 ### Milestones and integration plan
 
-Week 1
+Days 0 -> 5
 
 - A: finalize datasets.yaml with tested OPeNDAP slices and units; implement point/polygon extraction and DOY windowing.[^6][^3]
 - B: implement empirical probabilities and thresholds with tests; draft GEV fit function and GOF checks.[^8]
 - C: define request/response schemas; stub inference orchestrator and JSON serializer; integrate A’s API.[^1]
 
-Week 2
+Days 5 -> 10
 
 - A: caching, retries, and Giovanni adapter for point checks; validation notebook.[^4][^3]
 - B: finalize GEV workflow, uncertainty, and trend; composite uncomfortable; validation notebook.[^7][^8]
-- C: CSV export, provenance, caching keys, error mapping; end-to-end notebook; load tests.[^1]
+- C: CSV export, provenance.[^1] [OPTIONAL]
 
 ***
 
