@@ -259,9 +259,7 @@ Engineer C
 - Giovanni time-series Python examples for quick validation and comparisons.[^4]
 - IMERG precipitation product details including phase probability field.[^5]
 - Extreme value modeling references and practice for weather extremes.[^7][^8]
-<span style="display:none">[^12][^13][^14][^15][^16][^17][^18][^19][^20]</span>
 
-<div style="text-align: center">⁂</div>
 
 [^1]: https://www.spaceappschallenge.org/2025/challenges/will-it-rain-on-my-parade/
 
