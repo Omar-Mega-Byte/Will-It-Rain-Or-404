@@ -52,6 +52,7 @@ public class EventService {
     private final UserRepository userRepository;
     private final EventMapper eventMapper;
     private final EventValidation eventValidation;
+    private final com.weather_found.weather_app.modules.event.repository.UserEventRepository userEventRepository;
 
     // ===============================
     // CREATE OPERATIONS
@@ -255,7 +256,9 @@ public class EventService {
         // Validate deletion
         eventValidation.validateEventDeletion(event);
 
-        // Delete event
+        // First delete user-event relationships
+        userEventRepository.deleteByEventId(eventId);
+        // Then delete event
         eventRepository.delete(event);
 
         log.info("Successfully deleted event {} for user '{}'", eventId, username);
