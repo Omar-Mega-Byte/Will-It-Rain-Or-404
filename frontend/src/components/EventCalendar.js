@@ -198,7 +198,7 @@ const EventCalendar = ({
               <div className="space-y-1">
                 {dayEvents.slice(0, 3).map((event) => (
                   <div
-                    key={event.id}
+                    key={event.id || event.eventId}
                     onClick={(e) => handleEventClick(event, e)}
                     className={`text-xs p-1 rounded text-white truncate cursor-pointer hover:opacity-80 ${getEventStatusColor(event.eventStatus)}`}
                     title={`${event.eventName} - ${eventService.formatDate(event.startDate)}`}
@@ -206,7 +206,6 @@ const EventCalendar = ({
                     {event.eventName}
                   </div>
                 ))}
-                
                 {dayEvents.length > 3 && (
                   <div className="text-xs text-gray-500 font-medium">
                     +{dayEvents.length - 3} more
@@ -264,7 +263,7 @@ const EventCalendar = ({
                 >
                   {hourEvents.map(event => (
                     <div
-                      key={event.id}
+                      key={event.id || event.eventId}
                       onClick={(e) => handleEventClick(event, e)}
                       className={`text-xs p-1 rounded text-white mb-1 cursor-pointer hover:opacity-80 ${getEventStatusColor(event.eventStatus)}`}
                       title={`${event.eventName} - ${eventService.formatDate(event.startDate)}`}
