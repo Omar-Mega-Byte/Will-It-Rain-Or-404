@@ -44,12 +44,8 @@ public class SecurityConfig {
         @Bean
         public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
                 http
-                                // Enable CSRF protection with header-based tokens for JWT compatibility
-                                .csrf(csrf -> csrf
-                                                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                                                .ignoringRequestMatchers("/api/auth/**") // Ignore auth endpoints that
-                                                                                         // don't need CSRF
-                                )
+                                // Disable CSRF protection
+                                .csrf(csrf -> csrf.disable())
 
                                 // Enable CORS
                                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))

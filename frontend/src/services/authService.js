@@ -40,11 +40,7 @@ axios.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
-    // Include CSRF token for state-changing requests
-    const csrfToken = getCsrfToken();
-    if (csrfToken && ['post', 'put', 'delete', 'patch'].includes(config.method?.toLowerCase())) {
-      config.headers['X-XSRF-TOKEN'] = csrfToken;
-    }
+    // ...existing code...
 
     // Ensure Content-Type is application/json for all requests
     if (!config.headers['Content-Type']) {
