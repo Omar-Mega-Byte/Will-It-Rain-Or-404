@@ -4,12 +4,8 @@ import Home from './pages/Home';
 import Login from './pages/Login_new';
 import Register from './pages/Register_new';
 import Dashboard from './pages/Dashboard';
-import EnhancedDashboard from './pages/EnhancedDashboard';
-import ModernDashboard from './pages/ModernDashboard';
 import Events from './pages/Events';
-import ModernEvents from './pages/ModernEvents';
 import Calendar from './pages/Calendar';
-import ModernCalendar from './pages/ModernCalendar';
 import Analytics from './components/analytics/Analytics';
 import './App.css';
 import './styles/components/Common.css';
@@ -98,13 +94,9 @@ function App() {
           <Route path="/register" element={<Register />} />
 
           {/* Protected routes */}
-          <Route path="/dashboard" element={<ModernDashboard />} />
-          <Route path="/dashboard/original" element={<Dashboard />} />
-          <Route path="/dashboard/enhanced" element={<EnhancedDashboard />} />
-          <Route path="/events" element={<ModernEvents />} />
-          <Route path="/events/original" element={<Events />} />
-          <Route path="/calendar" element={<ModernCalendar />} />
-          <Route path="/calendar/original" element={<Calendar />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/events" element={<Events />} />
+          <Route path="/calendar" element={<Calendar />} />
           <Route path="/analytics/*" element={<Analytics />} />
 
           {/* Catch all route */}

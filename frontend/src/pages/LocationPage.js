@@ -152,9 +152,13 @@ const LocationPage = () => {
     setEditingLocation(null);
   };
 
+  if (loading && locations.length === 0) {
+    return <div className="location-page--loading">Loading...</div>;
+  }
+
   return (
     <div className="location-page">
-      <div className="location-page__header">
+      <header className="location-page__header">
         <h1>Location Management</h1>
         <button 
           className="btn btn-primary"
@@ -163,7 +167,7 @@ const LocationPage = () => {
         >
           Add New Location
         </button>
-      </div>
+      </header>
 
       {error && (
         <div className="location-page__error">
@@ -180,15 +184,15 @@ const LocationPage = () => {
       )}
 
       <div className="location-page__content">
-        <div className="location-page__search">
+        <section className="location-page__search">
           <LocationSearch
             onSearch={handleSearch}
             placeholder="Search locations by name, city, or country..."
             initialValue={searchQuery}
           />
-        </div>
+        </section>
 
-        <div className="location-page__list">
+        <section className="location-page__list">
           <LocationList
             locations={locations}
             loading={loading}
@@ -198,22 +202,23 @@ const LocationPage = () => {
             onEditLocation={handleEditLocation}
             onDeleteLocation={handleDeleteLocation}
           />
-        </div>
+        </section>
       </div>
 
       {showForm && (
         <div className="location-page__modal">
           <div className="modal-overlay" onClick={handleFormCancel}></div>
           <div className="modal-content">
-            <div className="modal-header">
+            <header className="modal-header">
               <h2>{editingLocation ? 'Edit Location' : 'Add New Location'}</h2>
               <button 
                 className="btn btn-icon btn-secondary"
                 onClick={handleFormCancel}
+                aria-label="Close modal"
               >
                 ×
               </button>
-            </div>
+            </header>
             <div className="modal-body">
               <LocationForm
                 initialData={editingLocation}

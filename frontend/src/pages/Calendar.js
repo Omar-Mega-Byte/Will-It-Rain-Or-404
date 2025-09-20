@@ -91,118 +91,147 @@ const Calendar = () => {
 
   if (error && !isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-            <svg className="w-12 h-12 text-red-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <h3 className="text-lg font-medium text-red-900 mb-2">Error Loading Calendar</h3>
-            <p className="text-red-700 mb-4">{error}</p>
-            <button
-              onClick={loadEvents}
-              className="bg-red-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
-            >
-              Try Again
-            </button>
-          </div>
-        </div>
+      <div className="calendar-error">
+        <div className="calendar-error-icon">⚠️</div>
+        <h3>Error Loading Calendar</h3>
+        <p>{error}</p>
+        <button className="calendar-error-btn" onClick={loadEvents}>
+          Try Again
+        </button>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="calendar-loading">
+        <div className="calendar-loading-spinner"></div>
+        <span>Loading calendar...</span>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="calendar-page">
+      <div className="calendar-container">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Calendar</h1>
-              <p className="mt-2 text-gray-600">
-                View and manage your events in calendar format
-              </p>
+        <div className="calendar-header">
+          <div className="calendar-header-content">
+            <div className="calendar-title-section">
+              <h1>Calendar</h1>
+              <p>View and manage your events in calendar format</p>
             </div>
-            
-            <div className="mt-4 sm:mt-0">
-              <button
-                onClick={() => handleDateClick(new Date())}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center space-x-2"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            <div className="calendar-actions">
+              <button className="create-event-btn" onClick={() => handleDateClick(new Date())}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M12 6v6m0 0v6m0-6h6m-6 0H6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
-                <span>Create Event</span>
+                Create Event
               </button>
             </div>
           </div>
         </div>
 
-        {/* Calendar Component */}
-        <EventCalendar
-          events={events}
-          onEventClick={handleEventClick}
-          onDateClick={handleDateClick}
-          isLoading={isLoading}
-          showCreateButton={false} // We have our own create button in the header
-        />
+        {/* Calendar Navigation */}
+        <div className="calendar-nav">
+          <button className="calendar-nav-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M15 19l-7-7 7-7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+          <div className="calendar-current-month">September 2025</div>
+          <button className="calendar-nav-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M9 5l7 7-7 7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Calendar Grid */}
+        <div className="calendar-grid-container">
+          <div className="calendar-grid">
+            <div className="calendar-weekdays">
+              <div className="calendar-weekday">Sun</div>
+              <div className="calendar-weekday">Mon</div>
+              <div className="calendar-weekday">Tue</div>
+              <div className="calendar-weekday">Wed</div>
+              <div className="calendar-weekday">Thu</div>
+              <div className="calendar-weekday">Fri</div>
+              <div className="calendar-weekday">Sat</div>
+            </div>
+            <EventCalendar
+              events={events}
+              onEventClick={handleEventClick}
+              onDateClick={handleDateClick}
+              isLoading={isLoading}
+              showCreateButton={false}
+            />
+          </div>
+        </div>
 
         {/* Quick Stats */}
-        {!isLoading && events.length > 0 && (
-          <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard
-              title="This Month"
-              value={getEventsThisMonth()}
-              icon="📅"
-              color="blue"
-            />
-            <StatCard
-              title="This Week"
-              value={getEventsThisWeek()}
-              icon="📆"
-              color="green"
-            />
-            <StatCard
-              title="Today"
-              value={getEventsToday()}
-              icon="⏰"
-              color="yellow"
-            />
-            <StatCard
-              title="Upcoming"
-              value={getUpcomingEvents()}
-              icon="🔜"
-              color="purple"
-            />
+        {events.length > 0 && (
+          <div className="calendar-stats">
+            <div className="calendar-stat-card blue">
+              <div className="calendar-stat-content">
+                <div className="calendar-stat-info">
+                  <h3>This Month</h3>
+                  <div className="value">{getEventsThisMonth()}</div>
+                </div>
+                <div className="calendar-stat-icon">📅</div>
+              </div>
+            </div>
+            <div className="calendar-stat-card green">
+              <div className="calendar-stat-content">
+                <div className="calendar-stat-info">
+                  <h3>This Week</h3>
+                  <div className="value">{getEventsThisWeek()}</div>
+                </div>
+                <div className="calendar-stat-icon">📆</div>
+              </div>
+            </div>
+            <div className="calendar-stat-card yellow">
+              <div className="calendar-stat-content">
+                <div className="calendar-stat-info">
+                  <h3>Today</h3>
+                  <div className="value">{getEventsToday()}</div>
+                </div>
+                <div className="calendar-stat-icon">⏰</div>
+              </div>
+            </div>
+            <div className="calendar-stat-card purple">
+              <div className="calendar-stat-content">
+                <div className="calendar-stat-info">
+                  <h3>Upcoming</h3>
+                  <div className="value">{getUpcomingEvents()}</div>
+                </div>
+                <div className="calendar-stat-icon">🔜</div>
+              </div>
+            </div>
           </div>
         )}
       </div>
 
       {/* Create Event Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-200">
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold text-gray-900">
-                  Create New Event
-                  {selectedDate && (
-                    <span className="text-sm font-normal text-gray-500 ml-2">
-                      for {selectedDate.toLocaleDateString()}
-                    </span>
-                  )}
-                </h2>
-                <button
-                  onClick={handleCloseCreateModal}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
+        <div className="event-modal-overlay">
+          <div className="event-modal-content">
+            <div className="event-modal-header">
+              <h2>
+                Create New Event
+                {selectedDate && (
+                  <span className="event-modal-date-info">
+                    for {selectedDate.toLocaleDateString()}
+                  </span>
+                )}
+              </h2>
+              <button className="event-modal-close-btn" onClick={handleCloseCreateModal}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M18 6L6 18M6 6l12 12" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
             </div>
-            <div className="p-6">
+            <div className="event-modal-body">
               <EventForm
                 event={getDefaultFormData()}
                 onSubmit={handleCreateEvent}
@@ -259,32 +288,6 @@ const Calendar = () => {
       return eventDate > now && event.eventStatus === 'SCHEDULED';
     }).length;
   }
-};
-
-// Statistics Card Component
-const StatCard = ({ title, value, icon, color }) => {
-  const getColorClasses = (color) => {
-    const colors = {
-      blue: 'bg-blue-50 text-blue-700 border-blue-200',
-      green: 'bg-green-50 text-green-700 border-green-200',
-      yellow: 'bg-yellow-50 text-yellow-700 border-yellow-200',
-      purple: 'bg-purple-50 text-purple-700 border-purple-200',
-      red: 'bg-red-50 text-red-700 border-red-200',
-    };
-    return colors[color] || colors.blue;
-  };
-
-  return (
-    <div className={`p-4 rounded-lg border ${getColorClasses(color)}`}>
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium">{title}</p>
-          <p className="text-2xl font-bold">{value}</p>
-        </div>
-        <div className="text-2xl">{icon}</div>
-      </div>
-    </div>
-  );
 };
 
 export default Calendar;
