@@ -1,5 +1,7 @@
 package com.weather_found.weather_app.modules.location.service;
 
+import com.weather_found.weather_app.modules.location.dto.ml.LocationMLRequest;
+
 import com.weather_found.weather_app.modules.location.dto.request.CreateLocationRequest;
 import com.weather_found.weather_app.modules.location.dto.request.UpdateLocationRequest;
 import com.weather_found.weather_app.modules.location.dto.response.LocationResponse;
@@ -27,6 +29,23 @@ import java.util.List;
 @Slf4j
 @Transactional(readOnly = true)
 public class LocationService {
+    /**
+     * Get essential ML data for a location by ID
+     */
+    public LocationMLRequest getLocationForMLById(Long id) {
+        log.debug("Fetching ML essential data for location with ID: {}", id);
+        Location location = locationRepository.findById(id)
+                .orElseThrow(() -> new LocationNotFoundException(id));
+
+        LocationMLRequest mlDto = new LocationMLRequest();
+        mlDto.setLatitude(location.getLatitude());
+        mlDto.setLongitude(location.getLongitude());
+        mlDto.setTimezone(location.getTimezone());
+        mlDto.setElevation(location.getElevation());
+        mlDto.setBeginDate(location.getBeginDate());
+        mlDto.setEndDate(location.getEndDate());
+        return mlDto;
+    }
 
     private final LocationRepository locationRepository;
     private final LocationMapper locationMapper;
