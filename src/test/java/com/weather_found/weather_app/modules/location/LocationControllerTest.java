@@ -31,10 +31,14 @@ class LocationControllerTest {
     void testGetAllLocations() {
         LocationSummaryResponse summary = new LocationSummaryResponse();
         summary.setId(1L);
+        summary.setBeginDate(java.time.LocalDate.of(2020, 1, 1));
+        summary.setEndDate(java.time.LocalDate.of(2025, 12, 31));
         when(locationService.getAllLocations()).thenReturn(Collections.singletonList(summary));
         ResponseEntity<List<LocationSummaryResponse>> result = locationController.getAllLocations();
         assertNotNull(result.getBody());
-        assertEquals(1, result.getBody().size());
-        assertEquals(1L, result.getBody().get(0).getId());
+        List<LocationSummaryResponse> body = result.getBody();
+        assertNotNull(body);
+        assertEquals(1, body.size());
+        assertEquals(1L, body.get(0).getId());
     }
 }
