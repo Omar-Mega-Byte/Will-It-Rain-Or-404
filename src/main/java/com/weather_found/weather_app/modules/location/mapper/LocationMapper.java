@@ -34,6 +34,8 @@ public class LocationMapper {
         location.setAddress(request.getAddress());
         location.setTimezone(request.getTimezone());
         location.setElevation(request.getElevation());
+        location.setBeginDate(request.getBeginDate());
+        location.setEndDate(request.getEndDate());
 
         return location;
     }
@@ -57,6 +59,8 @@ public class LocationMapper {
                 location.getAddress(),
                 location.getTimezone(),
                 location.getElevation(),
+                location.getBeginDate(),
+                location.getEndDate(),
                 location.getCreatedAt(),
                 location.getUpdatedAt());
     }
@@ -77,7 +81,9 @@ public class LocationMapper {
                 location.getCountry(),
                 location.getState(),
                 location.getCity(),
-                location.getTimezone());
+                location.getTimezone(),
+                location.getBeginDate(),
+                location.getEndDate());
     }
 
     /**
@@ -140,6 +146,12 @@ public class LocationMapper {
         }
         if (request.getElevation() != null) {
             location.setElevation(request.getElevation());
+        }
+        if (request.getBeginDate() != null) {
+            location.setBeginDate(request.getBeginDate());
+        }
+        if (request.getEndDate() != null) {
+            location.setEndDate(request.getEndDate());
         }
     }
 }
