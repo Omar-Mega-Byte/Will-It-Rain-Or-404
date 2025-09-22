@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 /**
  * DTO for location response
@@ -25,6 +26,8 @@ public class LocationResponse {
     private String address;
     private String timezone;
     private Integer elevation;
+    private LocalDate beginDate;
+    private LocalDate endDate;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
