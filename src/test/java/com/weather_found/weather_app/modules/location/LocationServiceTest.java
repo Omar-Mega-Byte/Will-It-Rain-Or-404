@@ -25,10 +25,14 @@ class LocationServiceTest {
     void testGetAllLocations() {
         Location location = new Location();
         location.setId(1L);
+        location.setBeginDate(java.time.LocalDate.of(2020, 1, 1));
+        location.setEndDate(java.time.LocalDate.of(2025, 12, 31));
         List<Location> locations = List.of(location);
         when(locationRepository.findAllByOrderByName()).thenReturn(locations);
         LocationSummaryResponse summary = new LocationSummaryResponse();
         summary.setId(1L);
+        summary.setBeginDate(java.time.LocalDate.of(2020, 1, 1));
+        summary.setEndDate(java.time.LocalDate.of(2025, 12, 31));
         when(locationMapper.toSummaryResponseList(locations)).thenReturn(List.of(summary));
         List<LocationSummaryResponse> result = locationService.getAllLocations();
         assertEquals(1, result.size());
@@ -53,6 +57,8 @@ class LocationServiceTest {
         request.setName("Test");
         request.setLatitude(BigDecimal.ONE);
         request.setLongitude(BigDecimal.ONE);
+        request.setBeginDate(java.time.LocalDate.of(2020, 1, 1));
+        request.setEndDate(java.time.LocalDate.of(2025, 12, 31));
         when(locationRepository.existsByLatitudeAndLongitude(request.getLatitude(), request.getLongitude()))
                 .thenReturn(false);
         Location location = new Location();
@@ -62,6 +68,8 @@ class LocationServiceTest {
         when(locationRepository.save(location)).thenReturn(savedLocation);
         LocationResponse response = new LocationResponse();
         response.setId(1L);
+        response.setBeginDate(java.time.LocalDate.of(2020, 1, 1));
+        response.setEndDate(java.time.LocalDate.of(2025, 12, 31));
         when(locationMapper.toResponse(savedLocation)).thenReturn(response);
         LocationResponse result = locationService.createLocation(request);
         assertEquals(1L, result.getId());
