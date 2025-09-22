@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
+import java.time.LocalDate;
+
 /**
  * DTO for creating a new location
  */
@@ -49,4 +51,9 @@ public class CreateLocationRequest {
     @Min(value = -500, message = "Elevation must be greater than -500 meters")
     @Max(value = 10000, message = "Elevation must be less than 10000 meters")
     private Integer elevation;
+
+    @NotNull(message = "Begin date is required")
+    private LocalDate beginDate;
+
+    private LocalDate endDate;
 }
